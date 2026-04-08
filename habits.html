@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>News Intelligence Engine | Kaiwen Li</title>
+    <title>Habits (15113) | Kaiwen Li</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -149,13 +149,6 @@
             text-decoration: underline;
         }
 
-        .project-img {
-            width: 100%;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            margin-bottom: 2rem;
-        }
-
         .code-block {
             background: #010409;
             border: 1px solid var(--border);
@@ -165,6 +158,7 @@
             font-size: 0.9rem;
             overflow-x: auto;
             margin-bottom: 1.5rem;
+            white-space: pre-wrap;
         }
 
         ul {
@@ -174,6 +168,31 @@
 
         li {
             margin-bottom: 0.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            color: var(--highlight);
+            background: var(--card);
+        }
+
+        code {
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.9em;
         }
 
         @media (max-width: 850px) {
@@ -213,10 +232,10 @@
         <a href="interests.html">~/interests</a>
         <a href="https://arcg.is/04Xv9r" target="_blank">~/asset management project</a>
         <a href="https://kaiwenli1000.wixsite.com/adopt-our-community" target="_blank">~/community project</a>
-        <a href="news.html" class="active">~/news intelligence engine</a>
+        <a href="news.html">~/news intelligence engine</a>
         <a href="todo.html">~/To-Do List Planner</a>
         <a href="megagem.html">~/MegaGem Live</a>
-        <a href="habits.html">~/Habits (15113)</a>
+        <a href="habits.html" class="active">~/Habits (15113)</a>
 
         <footer class="sidebar-footer">
             <p>kl5@andrew.cmu.edu </p>
@@ -225,92 +244,93 @@
         </footer>
     </nav>
     <div class="container">
-        <h1>News Intelligence Engine</h1>
+        <h1>Habits (15113 phone app)</h1>
 
-        <img src="15113 HW 4.png" alt="News Intelligence Engine" class="project-img">
-
-        <p>A full-stack application that leverages AI to synthesize global event data into actionable intelligence.</p>
-
-        <p><strong>Live Demo:</strong> <a href="https://backend-and-frontend-kl5.onrender.com"
-                target="_blank">https://backend-and-frontend-kl5.onrender.com</a></p>
-
-        <h2>Project Structure</h2>
-        <p>This project is organized into two main components:</p>
-        <ul>
-            <li><strong>backend/</strong>: Contains the Flask application logic and database.
-                <ul>
-                    <li><code>app.py</code>: Main server file.</li>
-                    <li><code>news.db</code>: SQLite database.</li>
-                    <li><code>requirements.txt</code>: Python dependencies.</li>
-                    <li><code>prompt_history.txt</code>: Archive of AI prompts.</li>
-                </ul>
-            </li>
-            <li><strong>frontend/</strong>: Contains the user interface assets.
-                <ul>
-                    <li><code>templates/</code>: HTML templates served by Flask.</li>
-                    <li><code>static/</code>: Static assets (CSS, JS, images).</li>
-                </ul>
-            </li>
-            <li><strong>render.yaml</strong>: Deployment configuration for Render.</li>
-        </ul>
+        <p>A small <strong>daily habits</strong> tracker built with <a href="https://expo.dev" target="_blank">Expo</a>
+            and <a href="https://docs.expo.dev/router/introduction/" target="_blank">Expo Router</a>. Data stays on the
+            device in <a href="https://react-native-async-storage.github.io/async-storage/" target="_blank">AsyncStorage</a>—no
+            accounts or network required.</p>
 
         <h2>Features</h2>
         <ul>
-            <li><strong>Real-Time Analysis</strong>: Fetches maximum relevance articles via NewsAPI.</li>
-            <li><strong>AI Synthesis</strong>: Uses Google Gemini 2.0 Flash to generate analyst assessments and key
-                points.</li>
-            <li><strong>History Tracking</strong>: Saves searches to a local SQLite database.</li>
+            <li><strong>Home:</strong> List habits, mark today done/undone, delete with confirmation, pull to refresh</li>
+            <li><strong>Stats:</strong> Today’s completion rate, rolling 7-day completion across habits, per-habit streaks</li>
+            <li><strong>Add habit:</strong> Modal with name and a preset emoji picker</li>
+            <li><strong>Per habit:</strong> Current streak and a 7-day completion grid (local calendar dates)</li>
         </ul>
 
-        <h2>Setup Instructions</h2>
+        <p>For the full product and data model, see <code>SPEC.md</code> in the project repository.</p>
 
-        <h3>Prerequisites</h3>
+        <h2>Requirements</h2>
         <ul>
-            <li>Python 3.10+</li>
-            <li>API Keys: <a href="https://newsapi.org/" target="_blank">NewsAPI</a> & <a href="https://ai.google.dev/"
-                    target="_blank">Google Gemini</a></li>
+            <li><a href="https://nodejs.org/" target="_blank">Node.js</a> (LTS recommended)</li>
+            <li>For simulators: <a href="https://developer.apple.com/xcode/" target="_blank">Xcode</a> (iOS) and/or <a
+                    href="https://developer.android.com/studio" target="_blank">Android Studio</a> (Android), or run on a
+                physical device with <a href="https://expo.dev/go" target="_blank">Expo Go</a></li>
         </ul>
 
-        <h3>Local Development</h3>
-        <ol>
-            <li>
-                <strong>Clone the repository:</strong>
-                <div class="code-block">
-                    git clone https://github.com/KaiwenLi2007/backend_and_frontend.git
-                    cd backend_and_frontend
-                </div>
-            </li>
-            <li>
-                <strong>Navigate to Backend & Install Dependencies:</strong>
-                <div class="code-block">
-                    cd backend
-                    pip install -r requirements.txt
-                </div>
-            </li>
-            <li>
-                <strong>Configure Environment:</strong>
-                <p>Create a <code>.env</code> file in the <code>backend/</code> directory:</p>
-                <div class="code-block">
-                    NEWS_API_KEY=your_news_api_key_here
-                    GEMINI_API_KEY=your_gemini_api_key_here
-                </div>
-            </li>
-            <li>
-                <strong>Run the App:</strong>
-                <div class="code-block">
-                    python app.py
-                </div>
-                <p>Access the app at <code>http://127.0.0.1:5000</code>.</p>
-            </li>
-        </ol>
+        <h2>Setup</h2>
+        <div class="code-block">npm install
+npx expo start</div>
+        <p>Then press <code>i</code> for iOS, <code>a</code> for Android, or scan the QR code in Expo Go.</p>
 
-        <h2>Deployment (Render)</h2>
-        <p>The included <code>render.yaml</code> handles deployment automatically.</p>
-        <ol>
-            <li>Connect your GitHub repository to Render.</li>
-            <li>Add Environment Variables (<code>NEWS_API_KEY</code>, <code>GEMINI_API_KEY</code>) in the Render
-                Dashboard.</li>
-        </ol>
+        <p>Other scripts:</p>
+        <div class="code-block">npm run lint        # ESLint (Expo config)
+npm run ios         # expo start --ios
+npm run android     # expo start --android</div>
+
+        <h2>Project layout</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Path</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>app/(tabs)/</code></td>
+                    <td>Tab screens: Home (<code>index</code>), Stats (<code>stats</code>)</td>
+                </tr>
+                <tr>
+                    <td><code>app/modal.tsx</code></td>
+                    <td>Add-habit flow</td>
+                </tr>
+                <tr>
+                    <td><code>hooks/useHabits.tsx</code></td>
+                    <td>Habits state + AsyncStorage sync (<code>HabitsProvider</code>)</td>
+                </tr>
+                <tr>
+                    <td><code>lib/habitsStorage.ts</code></td>
+                    <td>JSON parse/serialize for the <code>habits</code> key</td>
+                </tr>
+                <tr>
+                    <td><code>lib/dates.ts</code></td>
+                    <td>Local ISO dates, streaks, 7-day grid</td>
+                </tr>
+                <tr>
+                    <td><code>components/habits/</code></td>
+                    <td><code>HabitCard</code>, <code>SevenDayGrid</code>, empty/error UI</td>
+                </tr>
+                <tr>
+                    <td><code>types/habit.ts</code></td>
+                    <td><code>Habit</code> type and validation</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Tech stack</h2>
+        <ul>
+            <li>Expo ~54, React Native, TypeScript</li>
+            <li><code>expo-router</code> for navigation</li>
+            <li><code>@react-native-async-storage/async-storage</code> for persistence</li>
+        </ul>
+
+        <h2>Learn more</h2>
+        <ul>
+            <li><a href="https://docs.expo.dev/" target="_blank">Expo documentation</a></li>
+            <li><a href="https://reactnative.dev/docs/getting-started" target="_blank">React Native documentation</a></li>
+        </ul>
     </div>
 </body>
 
