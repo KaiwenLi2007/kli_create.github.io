@@ -3,336 +3,135 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Experience | Kaiwen Li</title>
-    <style>
-        :root {
-            --bg: #0d1117;
-            --card: #161b22;
-            --text: #c9d1d9;
-            --sub: #8b949e;
-            --border: #30363d;
-            --highlight: #f0f6fc;
-            --accent: #58a6ff;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
-            margin: 0;
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* --- SIDEBAR STYLE (UNTOUCHED) --- */
-        nav {
-            border-right: 1px solid var(--border);
-            padding: 3rem 2rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            gap: 1.5rem;
-            background: var(--bg);
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            width: 220px;
-            min-width: 220px;
-            box-sizing: border-box;
-        }
-
-        .sidebar-logo {
-            width: 100%;
-            display: flex;
-            justify-content: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .sidebar-logo img {
-            max-width: 80px;
-            height: auto;
-            border-radius: 8px;
-        }
-
-        .sidebar-footer {
-            margin-top: auto;
-            padding-top: 2rem;
-        }
-
-        .sidebar-footer p {
-            color: var(--sub);
-            font-size: 0.75rem;
-            margin: 4px 0;
-            line-height: 1.4;
-        }
-
-        nav a {
-            color: var(--sub);
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        nav a:hover,
-        .active {
-            color: var(--highlight);
-        }
-
-        /* --- MAIN CONTENT STYLE (TIMELINE) --- */
-        .container {
-            flex-grow: 1;
-            max-width: 900px;
-            margin: 60px auto;
-            padding: 0 60px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            color: var(--highlight);
-            margin-bottom: 2rem;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1rem;
-        }
-
-        .timeline {
-            position: relative;
-            border-left: 2px solid var(--border);
-            padding-left: 2rem;
-            margin-left: 0.5rem;
-        }
-
-        .exp-entry {
-            position: relative;
-            margin-bottom: 3rem;
-        }
-
-        /* Timeline Dot */
-        .exp-entry::before {
-            content: "";
-            position: absolute;
-            left: calc(-2rem - 6px);
-            top: 8px;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--accent);
-            border: 3px solid var(--bg);
-        }
-
-        .exp-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-        }
-
-        .job-title {
-            color: var(--highlight);
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .date {
-            color: var(--sub);
-            font-size: 0.9rem;
-            font-family: monospace;
-        }
-
-        .company {
-            color: var(--accent);
-            font-size: 1rem;
-            margin-top: 4px;
-            font-weight: 500;
-            font-family: monospace;
-        }
-
-        .desc-list {
-            list-style: none;
-            padding-left: 0;
-            margin-top: 15px;
-        }
-
-        .desc-list li {
-            font-size: 0.95rem;
-            color: var(--text);
-            margin-bottom: 8px;
-            line-height: 1.6;
-            position: relative;
-            padding-left: 1.5rem;
-        }
-
-        .desc-list li::before {
-            content: "»";
-            position: absolute;
-            left: 0;
-            color: var(--accent);
-            font-weight: bold;
-        }
-
-        /* Leadership Section */
-        .leadership-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        .leadership-box h2 {
-            font-size: 1.1rem;
-            color: var(--highlight);
-            margin-top: 0;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .leadership-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .leadership-item strong {
-            color: var(--highlight);
-            display: block;
-            font-size: 0.95rem;
-        }
-
-        .leadership-item span {
-            color: var(--sub);
-            font-size: 0.85rem;
-        }
-
-        @media (max-width: 850px) {
-            body {
-                flex-direction: column;
-            }
-
-            nav {
-                width: 100%;
-                height: auto;
-                flex-direction: row;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-                position: relative;
-                padding: 1.5rem;
-                justify-content: center;
-                gap: 1.5rem;
-            }
-
-            .sidebar-footer {
-                display: none;
-            }
-
-            .sidebar-logo {
-                width: auto;
-                margin-bottom: 0;
-                margin-right: 1rem;
-            }
-
-            .sidebar-logo img {
-                max-width: 40px;
-            }
-
-            .container {
-                padding: 40px 20px;
-            }
-
-            .leadership-list {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Experience — Kaiwen Li</title>
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ctext x='32' y='45' font-family='Arial' font-size='38' font-weight='bold' text-anchor='middle' fill='white'%3EK%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <nav>
-        <div class="sidebar-logo">
-            <img src="Gemini_Generated_Image_7rpene7rpene7rpe (1).png" alt="Logo">
-        </div>
-        <a href="index.html">~/home</a>
-        <a href="education.html">~/education</a>
-        <a href="experience.html" class="active">~/experience</a>
-        <a href="honors.html">~/mathematical experience</a>
-        <a href="interests.html">~/interests</a>
-        <a href="https://arcg.is/04Xv9r" target="_blank">~/asset management project</a>
-        <a href="https://kaiwenli1000.wixsite.com/adopt-our-community" target="_blank">~/community project</a>
-        <a href="news.html">~/news intelligence engine</a>
-        <a href="todo.html">~/To-Do List Planner</a>
-        <a href="megagem.html">~/MegaGem Live</a>
-        <a href="habits.html">~/Habits (15113)</a>
-        <a href="bingbeats.html">~/Bing Beats</a>
+    <div class="ambient">
+        <div class="orb orb-violet"></div>
+        <div class="orb orb-cyan"></div>
+        <div class="orb orb-pink"></div>
+        <div class="orb orb-amber"></div>
+        <div class="grid-overlay"></div>
+        <div class="noise"></div>
+    </div>
 
-        <footer class="sidebar-footer">
-            <p>kl5@andrew.cmu.edu</p>
-            <p>1-412-891-5688</p>
-            <p>Assisted by Gemini</p>
-        </footer>
-    </nav>
+    <header class="site-nav">
+        <a class="nav-logo" href="index.html">KL.</a>
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="education.html">Education</a>
+            <a href="experience.html" class="active">Experience</a>
+            <a href="honors.html">Mathematics</a>
+            <a href="interests.html">Interests</a>
+            <a href="bingbeats.html">Bing Beats</a>
+            <a href="megagem.html">MegaGem</a>
+            <a href="https://arcg.is/04Xv9r" target="_blank" class="ext">Assets</a>
+        </nav>
+        <button class="menu-btn" aria-label="Open menu">
+            <span class="bars"><span></span><span></span></span>
+            Menu
+        </button>
+    </header>
 
-    <div class="container">
-        <h1>Experience</h1>
+    <div class="overlay-menu">
+        <button class="overlay-close">Close</button>
+        <a href="index.html"><span class="idx">01</span>Home</a>
+        <a href="education.html"><span class="idx">02</span>Education</a>
+        <a href="experience.html"><span class="idx">03</span>Experience</a>
+        <a href="honors.html"><span class="idx">04</span>Mathematics</a>
+        <a href="interests.html"><span class="idx">05</span>Interests</a>
+        <a href="bingbeats.html"><span class="idx">06</span>Bing Beats</a>
+        <a href="megagem.html"><span class="idx">07</span>MegaGem Live</a>
+        <a href="https://arcg.is/04Xv9r" target="_blank"><span class="idx">08</span>Asset Management ↗</a>
+    </div>
+
+    <main class="page">
+        <span class="kicker" data-reveal>03 — Experience</span>
+        <h1 class="display" data-reveal style="--d: 0.05s;">Experience<em>.</em></h1>
+        <p class="lede" data-reveal style="--d: 0.1s;">
+            Instruction and mentorship across mathematics, physics, and athletics —
+            complemented by selective academic programs in algebra, combinatorics,
+            and engineering.
+        </p>
 
         <div class="timeline">
-            <div class="exp-entry">
-                <div class="exp-header">
-                    <h2 class="job-title">Snowboard Instructor</h2>
-                    <span class="date">2023 — Present</span>
+            <div class="t-entry" data-reveal>
+                <div class="t-head">
+                    <h2 class="t-title">Snowboard Instructor</h2>
+                    <span class="t-date">2023 — Present</span>
                 </div>
-                <div class="company">Self-Employed</div>
-                <ul class="desc-list">
+                <span class="t-org">Self-Employed</span>
+                <ul class="t-points">
                     <li>Certified instruction specializing in carving and park techniques.</li>
                     <li>Advanced technical training and athlete progression management.</li>
                 </ul>
             </div>
 
-            <div class="exp-entry">
-                <div class="exp-header">
-                    <h2 class="job-title">Teaching Assistant</h2>
-                    <span class="date">2022 — 2025</span>
+            <div class="t-entry" data-reveal style="--d: 0.08s;">
+                <div class="t-head">
+                    <h2 class="t-title">Teaching Assistant</h2>
+                    <span class="t-date">2022 — 2025</span>
                 </div>
-                <div class="company">Kerrisdale Academy</div>
-                <ul class="desc-list">
+                <span class="t-org">Kerrisdale Academy</span>
+                <ul class="t-points">
                     <li>Instructional support for AP Statistics, AP Calculus BC, and AP Physics C.</li>
                     <li>Strategic tutoring for advanced secondary students in STEM.</li>
                 </ul>
             </div>
 
-            <div class="exp-entry">
-                <div class="exp-header">
-                    <h2 class="job-title">Involvement & Leadership</h2>
-                    <span class="date">Academic Enrichment</span>
+            <div class="t-entry" data-reveal style="--d: 0.16s;">
+                <div class="t-head">
+                    <h2 class="t-title">Involvement &amp; Leadership</h2>
+                    <span class="t-date">Academic Enrichment</span>
                 </div>
-                <div class="leadership-box">
-                    <div class="leadership-list">
-                        <div class="leadership-item">
-                            <strong>SUMaC (Stanford Math Camp)</strong>
-                            <span>Investigated Abstract Algebra & Number Theory.</span>
-                        </div>
-                        <div class="leadership-item">
-                            <strong>UBC Math Circle</strong>
-                            <span>Problem solving in algebra and combinatorics.</span>
-                        </div>
-                        <div class="leadership-item">
-                            <strong>NSLC Engineering</strong>
-                            <span>Hands-on design and leadership training.</span>
-                        </div>
-                        <div class="leadership-item">
-                            <strong>CMU Quant & Math Clubs</strong>
-                            <span>Active Member.</span>
-                        </div>
+
+                <div class="bento" style="margin-top: 1.4rem;">
+                    <div class="glass-card span-3">
+                        <span class="card-label">Research</span>
+                        <h3 class="card-title">SUMaC — Stanford Math Camp</h3>
+                        <p class="card-desc">Investigated Abstract Algebra &amp; Number Theory.</p>
+                    </div>
+                    <div class="glass-card span-3">
+                        <span class="card-label">Problem Solving</span>
+                        <h3 class="card-title">UBC Math Circle</h3>
+                        <p class="card-desc">Problem solving in algebra and combinatorics.</p>
+                    </div>
+                    <div class="glass-card span-3">
+                        <span class="card-label">Engineering</span>
+                        <h3 class="card-title">NSLC Engineering</h3>
+                        <p class="card-desc">Hands-on design and leadership training.</p>
+                    </div>
+                    <div class="glass-card span-3">
+                        <span class="card-label">Campus</span>
+                        <h3 class="card-title">CMU Quant &amp; Math Clubs</h3>
+                        <p class="card-desc">Active member.</p>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
+
+    <footer class="site-footer">
+        <span class="foot-name">Kaiwen Li</span>
+        <div class="foot-meta">
+            <a href="mailto:kl5@andrew.cmu.edu">kl5@andrew.cmu.edu</a>
+            <span>1-412-891-5688</span>
+            <span>Pittsburgh, PA</span>
+        </div>
+    </footer>
+
+    <script src="site.js"></script>
+    <script src="signature.js"></script>
 </body>
 
 </html>

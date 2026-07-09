@@ -3,298 +3,113 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Education | Kaiwen Li</title>
-    <style>
-        :root {
-            --bg: #0d1117;
-            --card: #161b22;
-            --text: #c9d1d9;
-            --sub: #8b949e;
-            --border: #30363d;
-            --highlight: #f0f6fc;
-            --accent: #58a6ff;
-            /* Added for subtle accents */
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
-            margin: 0;
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* --- SIDEBAR STYLE (UNTOUCHED PER REQUEST) --- */
-        nav {
-            border-right: 1px solid var(--border);
-            padding: 3rem 2rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            gap: 1.5rem;
-            background: var(--bg);
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            width: 220px;
-            min-width: 220px;
-            box-sizing: border-box;
-        }
-
-        .sidebar-logo {
-            width: 100%;
-            display: flex;
-            justify-content: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .sidebar-logo img {
-            max-width: 80px;
-            height: auto;
-            border-radius: 8px;
-        }
-
-        .sidebar-footer {
-            margin-top: auto;
-            padding-top: 2rem;
-        }
-
-        .sidebar-footer p {
-            color: var(--sub);
-            font-size: 0.75rem;
-            margin: 4px 0;
-            line-height: 1.4;
-        }
-
-        nav a {
-            color: var(--sub);
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        nav a:hover,
-        .active {
-            color: var(--highlight);
-        }
-
-        /* --- MAIN CONTENT STYLE (UPDATED) --- */
-        .container {
-            flex-grow: 1;
-            max-width: 900px;
-            margin: 60px auto;
-            padding: 0 60px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            color: var(--highlight);
-            margin-bottom: 2rem;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1rem;
-        }
-
-        .education-timeline {
-            position: relative;
-            border-left: 2px solid var(--border);
-            padding-left: 2rem;
-            margin-left: 0.5rem;
-        }
-
-        .school-entry {
-            position: relative;
-            margin-bottom: 3rem;
-        }
-
-        /* The dot on the timeline */
-        .school-entry::before {
-            content: "";
-            position: absolute;
-            left: calc(-2rem - 6px);
-            top: 8px;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--accent);
-            border: 3px solid var(--bg);
-        }
-
-        .school-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-            margin-bottom: 0.5rem;
-        }
-
-        .school-name {
-            color: var(--highlight);
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .date {
-            color: var(--sub);
-            font-size: 0.95rem;
-            font-family: monospace;
-        }
-
-        .degree {
-            color: var(--text);
-            font-size: 1.1rem;
-            margin-top: 4px;
-            font-weight: 500;
-        }
-
-        .gpa {
-            color: var(--sub);
-            font-size: 0.95rem;
-            margin-top: 4px;
-        }
-
-        .gpa strong {
-            color: var(--accent);
-        }
-
-        .course-container {
-            margin-top: 1.2rem;
-        }
-
-        .course-label {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--sub);
-            margin-bottom: 0.8rem;
-            display: block;
-        }
-
-        .course-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 0;
-            list-style: none;
-        }
-
-        .course-item {
-            background: var(--card);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            transition: border-color 0.2s;
-        }
-
-        .course-item:hover {
-            border-color: var(--accent);
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 850px) {
-            body {
-                flex-direction: column;
-            }
-
-            nav {
-                width: 100%;
-                height: auto;
-                flex-direction: row;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-                position: relative;
-                padding: 1.5rem;
-                justify-content: center;
-                gap: 1.5rem;
-            }
-
-            .sidebar-footer {
-                display: none;
-            }
-
-            .sidebar-logo {
-                width: auto;
-                margin-bottom: 0;
-                margin-right: 1rem;
-            }
-
-            .sidebar-logo img {
-                max-width: 40px;
-            }
-
-            .container {
-                padding: 40px 20px;
-                margin: 0 auto;
-            }
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Education — Kaiwen Li</title>
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ctext x='32' y='45' font-family='Arial' font-size='38' font-weight='bold' text-anchor='middle' fill='white'%3EK%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <nav>
-        <div class="sidebar-logo">
-            <img src="Gemini_Generated_Image_7rpene7rpene7rpe (1).png" alt="Logo">
-        </div>
-        <a href="index.html">~/home</a>
-        <a href="education.html" class="active">~/education</a>
-        <a href="experience.html">~/experience</a>
-        <a href="honors.html">~/mathematical experience</a>
-        <a href="interests.html">~/interests</a>
-        <a href="https://arcg.is/04Xv9r" target="_blank">~/asset management project</a>
-        <a href="https://kaiwenli1000.wixsite.com/adopt-our-community" target="_blank">~/community project</a>
-        <a href="news.html">~/news intelligence engine</a>
-        <a href="todo.html">~/To-Do List Planner</a>
-        <a href="megagem.html">~/MegaGem Live</a>
-        <a href="habits.html">~/Habits (15113)</a>
-        <a href="bingbeats.html">~/Bing Beats</a>
+    <div class="ambient">
+        <div class="orb orb-violet"></div>
+        <div class="orb orb-cyan"></div>
+        <div class="orb orb-pink"></div>
+        <div class="orb orb-amber"></div>
+        <div class="grid-overlay"></div>
+        <div class="noise"></div>
+    </div>
 
-        <footer class="sidebar-footer">
-            <p>kl5@andrew.cmu.edu</p>
-            <p>1-412-891-5688</p>
-            <p>Assisted by Gemini</p>
-        </footer>
-    </nav>
+    <header class="site-nav">
+        <a class="nav-logo" href="index.html">KL.</a>
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="education.html" class="active">Education</a>
+            <a href="experience.html">Experience</a>
+            <a href="honors.html">Mathematics</a>
+            <a href="interests.html">Interests</a>
+            <a href="bingbeats.html">Bing Beats</a>
+            <a href="megagem.html">MegaGem</a>
+            <a href="https://arcg.is/04Xv9r" target="_blank" class="ext">Assets</a>
+        </nav>
+        <button class="menu-btn" aria-label="Open menu">
+            <span class="bars"><span></span><span></span></span>
+            Menu
+        </button>
+    </header>
 
-    <div class="container">
-        <h1>Education</h1>
+    <div class="overlay-menu">
+        <button class="overlay-close">Close</button>
+        <a href="index.html"><span class="idx">01</span>Home</a>
+        <a href="education.html"><span class="idx">02</span>Education</a>
+        <a href="experience.html"><span class="idx">03</span>Experience</a>
+        <a href="honors.html"><span class="idx">04</span>Mathematics</a>
+        <a href="interests.html"><span class="idx">05</span>Interests</a>
+        <a href="bingbeats.html"><span class="idx">06</span>Bing Beats</a>
+        <a href="megagem.html"><span class="idx">07</span>MegaGem Live</a>
+        <a href="https://arcg.is/04Xv9r" target="_blank"><span class="idx">08</span>Asset Management ↗</a>
+    </div>
 
-        <div class="education-timeline">
-            <div class="school-entry">
-                <div class="school-header">
-                    <h2 class="school-name">Carnegie Mellon University</h2>
-                    <span class="date">Expected May 2029</span>
+    <main class="page">
+        <span class="kicker" data-reveal>02 — Education</span>
+        <h1 class="display" data-reveal style="--d: 0.05s;">Education<em>.</em></h1>
+        <p class="lede" data-reveal style="--d: 0.1s;">
+            Studying Mathematics and Computer Science at Carnegie Mellon University,
+            with coursework spanning pure mathematics, theoretical computer science,
+            and programming.
+        </p>
+
+        <div class="timeline">
+            <div class="t-entry" data-reveal>
+                <div class="t-head">
+                    <h2 class="t-title">Carnegie Mellon University</h2>
+                    <span class="t-date">Expected May 2029</span>
                 </div>
-                <div class="degree">B.S. in Mathematics</div>
-                <div class="gpa">Concentration: Discrete Mathematics and Logic</div>
+                <span class="t-org">B.S. · Mathematics &amp; Computer Science</span>
 
-                <div class="course-container">
-                    <span class="course-label">Relevant Coursework</span>
-                    <ul class="course-list">
-                        <li class="course-item">Principles of Functional Programming</li>
-                        <li class="course-item">Principles of Imperative Computation</li>
-                        <li class="course-item">Mathematical Foundations for CS</li>
-                        <li class="course-item">Matrices & Linear Transformation</li>
-                        <li class="course-item">Vector Calculus</li>
-                        <li class="course-item">Multivariable Calculus</li>
+                <div class="glass-card" style="margin-top: 1.4rem;">
+                    <span class="card-label">Relevant Coursework</span>
+                    <ul class="chip-row" style="margin-top: 0;">
+                        <li class="chip">Principles of Functional Programming</li>
+                        <li class="chip">Principles of Imperative Computation</li>
+                        <li class="chip">Mathematical Foundations for CS</li>
+                        <li class="chip">Matrices &amp; Linear Transformations</li>
+                        <li class="chip">Vector Calculus</li>
+                        <li class="chip">Multivariable Calculus</li>
                     </ul>
                 </div>
             </div>
 
-            <div class="school-entry">
-                <div class="school-header">
-                    <h2 class="school-name">Lord Byng Secondary School</h2>
-                    <span class="date">Sept 2021 – May 2025</span>
+            <div class="t-entry" data-reveal style="--d: 0.1s;">
+                <div class="t-head">
+                    <h2 class="t-title">Lord Byng Secondary School</h2>
+                    <span class="t-date">Sept 2021 — May 2025</span>
                 </div>
-                <div class="degree">High School Diploma</div>
-                <div class="gpa">GPA: <strong>96/100</strong> | Principal's List</div>
+                <span class="t-org">High School Diploma · Vancouver, BC</span>
+                <ul class="t-points">
+                    <li>GPA: <strong style="color: var(--ink);">96 / 100</strong></li>
+                    <li>Principal's List</li>
+                </ul>
             </div>
         </div>
-    </div>
+    </main>
+
+    <footer class="site-footer">
+        <span class="foot-name">Kaiwen Li</span>
+        <div class="foot-meta">
+            <a href="mailto:kl5@andrew.cmu.edu">kl5@andrew.cmu.edu</a>
+            <span>1-412-891-5688</span>
+            <span>Pittsburgh, PA</span>
+        </div>
+    </footer>
+
+    <script src="site.js"></script>
+    <script src="signature.js"></script>
 </body>
 
 </html>

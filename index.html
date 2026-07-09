@@ -3,272 +3,219 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Kaiwen Li | Portfolio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kaiwen Li — Math &amp; CS @ CMU</title>
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ctext x='32' y='45' font-family='Arial' font-size='38' font-weight='bold' text-anchor='middle' fill='white'%3EK%3C/text%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap"
         rel="stylesheet">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
-        rel="stylesheet">
-
-    <style>
-        :root {
-            --bg: #0d1117;
-            --card: #161b22;
-            --text: #c9d1d9;
-            --sub: #8b949e;
-            --border: #30363d;
-            --highlight: #f0f6fc;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', -apple-system, system-ui, sans-serif;
-            margin: 0;
-            display: flex;
-            min-height: 100vh;
-        }
-
-        nav {
-            border-right: 1px solid var(--border);
-            padding: 3rem 2rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            gap: 1.5rem;
-            background: var(--bg);
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            width: 220px;
-            min-width: 220px;
-            box-sizing: border-box;
-        }
-
-        .sidebar-logo {
-            width: 100%;
-            display: flex;
-            justify-content: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .sidebar-logo img {
-            max-width: 80px;
-            height: auto;
-            border-radius: 8px;
-        }
-
-        @media (max-width: 850px) {
-            .sidebar-logo {
-                width: auto;
-                margin-bottom: 0;
-                margin-right: 1rem;
-            }
-
-            .sidebar-logo img {
-                max-width: 40px;
-            }
-        }
-
-        .sidebar-footer {
-            margin-top: auto;
-            padding-top: 2rem;
-        }
-
-        .sidebar-footer p {
-            color: var(--sub);
-            font-size: 0.75rem;
-            margin: 4px 0;
-            font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
-            line-height: 1.4;
-        }
-
-        @media (max-width: 850px) {
-            .sidebar-footer {
-                display: none;
-            }
-        }
-
-        nav a {
-            font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
-            color: var(--sub);
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        nav a:hover,
-        .active {
-            color: var(--highlight);
-        }
-
-        /* CONTENT AREA: Slightly scaled down from the previous version */
-        .container {
-            flex-grow: 1;
-            max-width: 800px;
-            margin: 80px auto 40px auto;
-            padding: 0 40px;
-            font-size: 1.15rem;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: calc(100vh - 120px);
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            /* Reduced from 3rem */
-            color: var(--highlight);
-            letter-spacing: -1px;
-            margin: 0;
-            font-weight: 800;
-        }
-
-        .tagline {
-            color: var(--sub);
-            margin: 6px 0;
-            font-weight: 500;
-            font-size: 1.25rem;
-        }
-
-        .contact {
-            color: var(--sub);
-            margin-top: 1rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1rem;
-        }
-
-        .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 30px;
-            margin-bottom: 35px;
-        }
-
-        .header-img {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
-            object-fit: cover;
-        }
-
-        .code-block {
-            background: #010409;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            font-family: "JetBrains Mono", monospace;
-            font-size: 0.95rem;
-            margin-top: 2rem;
-            line-height: 1.6;
-        }
-
-        @media (max-width: 850px) {
-            body {
-                flex-direction: column;
-            }
-
-            nav {
-                width: 100%;
-                height: auto;
-                flex-direction: row;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-                position: relative;
-                padding: 1.5rem;
-                justify-content: center;
-                gap: 1.5rem;
-            }
-
-            .container {
-                margin: 40px auto;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .profile-header {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <nav>
-        <div class="sidebar-logo">
-            <img src="Gemini_Generated_Image_7rpene7rpene7rpe (1).png" alt="Logo">
+    <!-- Ambient cursor-reactive background -->
+    <div class="ambient">
+        <div class="orb orb-violet"></div>
+        <div class="orb orb-cyan"></div>
+        <div class="orb orb-pink"></div>
+        <div class="orb orb-amber"></div>
+        <div class="grid-overlay"></div>
+        <div class="noise"></div>
+    </div>
+
+    <header class="site-nav">
+        <a class="nav-logo" href="index.html">KL.</a>
+        <nav class="nav-links">
+            <a href="index.html" class="active">Home</a>
+            <a href="education.html">Education</a>
+            <a href="experience.html">Experience</a>
+            <a href="honors.html">Mathematics</a>
+            <a href="interests.html">Interests</a>
+            <a href="bingbeats.html">Bing Beats</a>
+            <a href="megagem.html">MegaGem</a>
+            <a href="https://arcg.is/04Xv9r" target="_blank" class="ext">Assets</a>
+        </nav>
+        <button class="menu-btn" aria-label="Open menu">
+            <span class="bars"><span></span><span></span></span>
+            Menu
+        </button>
+    </header>
+
+    <div class="overlay-menu">
+        <button class="overlay-close">Close</button>
+        <a href="index.html"><span class="idx">01</span>Home</a>
+        <a href="education.html"><span class="idx">02</span>Education</a>
+        <a href="experience.html"><span class="idx">03</span>Experience</a>
+        <a href="honors.html"><span class="idx">04</span>Mathematics</a>
+        <a href="interests.html"><span class="idx">05</span>Interests</a>
+        <a href="bingbeats.html"><span class="idx">06</span>Bing Beats</a>
+        <a href="megagem.html"><span class="idx">07</span>MegaGem Live</a>
+        <a href="https://arcg.is/04Xv9r" target="_blank"><span class="idx">08</span>Asset Management ↗</a>
+    </div>
+
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+        <div class="hero-watermark" aria-hidden="true">KAIWEN</div>
+
+        <div class="hero-inner">
+            <div class="status-pill">
+                <span class="dot"></span>
+                Carnegie Mellon · Class of 2029
+            </div>
+
+            <h1 class="hero-name">
+                <span class="line"><span>Kaiwen</span></span>
+                <span class="line"><span><span class="shine">Li</span></span></span>
+            </h1>
+
+            <p class="hero-tag">
+                Mathematics &amp; Computer Science at Carnegie Mellon University
+            </p>
+
+            <p class="hero-contact">kl5@andrew.cmu.edu &nbsp;·&nbsp; 1-412-891-5688 &nbsp;·&nbsp; Pittsburgh, PA</p>
+
+            <div class="btn-row hero-cta" style="justify-content: center;">
+                <a class="btn btn-primary" href="#work">See my work <span class="arrow">→</span></a>
+                <a class="btn btn-ghost" href="mailto:kl5@andrew.cmu.edu">Get in touch</a>
+            </div>
         </div>
-        <a href="index.html" class="active">~/home</a>
-        <a href="education.html">~/education</a>
-        <a href="experience.html">~/experience</a>
-        <a href="honors.html">~/mathematical experience</a>
-        <a href="interests.html">~/interests</a>
-        <a href="https://arcg.is/04Xv9r" target="_blank">~/asset management project</a>
-        <a href="https://kaiwenli1000.wixsite.com/adopt-our-community" target="_blank">~/community project</a>
-        <a href="news.html">~/news intelligence engine</a>
-        <a href="todo.html">~/To-Do List Planner</a>
-        <a href="megagem.html">~/MegaGem Live</a>
-        <a href="habits.html">~/Habits (15113)</a>
-        <a href="bingbeats.html">~/Bing Beats</a>
 
-        <footer class="sidebar-footer">
-            <p>kl5@andrew.cmu.edu </p>
-            <p>1-412-891-5688</p>
-            <p>Assisted by Gemini</p>
-        </footer>
-    </nav>
-    <div class="container">
-        <header class="profile-header">
-            <img src="381769150556_.pic.jpg" alt="Kaiwen Li" class="header-img">
+        <div class="scroll-cue">Scroll</div>
+    </section>
 
-            <div class="header-text">
-                <h1>Kaiwen Li</h1>
-                <p class="tagline">Mathematics @ Carnegie Mellon University</p>
-                <div class="contact">
-                    kl5@andrew.cmu.edu • 1-412-891-5688
+    <!-- ============ ABOUT ============ -->
+    <main class="page" style="padding-top: 40px;">
+        <section id="about">
+            <span class="kicker" data-reveal>About</span>
+            <h2 class="display" data-reveal style="--d: 0.05s;">
+                Mathematics &amp;<br>Computer Science.
+            </h2>
+
+            <div class="about-grid section-gap" style="margin-top: 3rem;">
+                <div class="portrait-frame" data-tilt data-reveal>
+                    <img src="381769150556_.pic.jpg" alt="Kaiwen Li">
+                </div>
+
+                <div>
+                    <p class="lede" data-reveal style="--d: 0.1s; margin-bottom: 2rem;">
+                        Mathematics and Computer Science student at Carnegie Mellon University,
+                        with a focus on abstract reasoning, functional programming, and teaching.
+                    </p>
+
+                    <div class="code-block" data-reveal style="--d: 0.18s;"><span class="kw">const</span> profile = {
+    location: <span class="str">"Pittsburgh, PA"</span>,
+    major:    [<span class="str">"Mathematics"</span>, <span class="str">"Computer Science"</span>],
+    status:   <span class="str">"Active Freshman"</span>,
+};</div>
+
+                    <div class="stat-strip" data-reveal style="--d: 0.26s; margin-top: 2.2rem;">
+                        <div class="stat">
+                            <div class="num">USAMO</div>
+                            <div class="lbl">Qualifier · 2024</div>
+                        </div>
+                        <div class="stat">
+                            <div class="num">3×</div>
+                            <div class="lbl">AIME Qualifier</div>
+                        </div>
+                        <div class="stat">
+                            <div class="num">2.5%</div>
+                            <div class="lbl">Top of Euclid, Global</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </header>
+        </section>
 
-        <p>Mathematics student specializing in Discrete Mathematics and Logic. Passionate about abstract reasoning,
-            functional programming, and teaching.</p>
-
-        <div class="code-block" style="margin-bottom: 3rem;">
-            <span style="color: #ff7b72;">const</span> profile = {<br>
-            &nbsp;&nbsp;location: <span style="color: #a5d6ff;">"Pittsburgh, PA"</span>,<br>
-            &nbsp;&nbsp;major: [<span style="color: #a5d6ff;">"Discrete Math and Logic"</span>],<br>
-            &nbsp;&nbsp;status: <span style="color: #a5d6ff;">"Active Freshman"</span><br>
-            };
-        </div>
-
-        <div class="project-summary" style="margin-bottom: 2rem;">
-            <h2 style="color: var(--highlight); font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 600;">Featured
-                Project: MegaGem Live</h2>
-            <p style="color: var(--sub); line-height: 1.6; margin-bottom: 1rem;">
-                I created <strong>MegaGem Live</strong>, an interactive auction strategy game (1 human vs 2 AI). Players
-                bid on hidden gem signals to optimize end-round value. Built entirely from scratch using Python
-                (Flask/Socket.IO) and Vanilla JavaScript. It features real-time multiplayer bidding, automated AI
-                opponents, and an integrated Gemini-powered AI Tutor that offers in-game predictions and gameplay
-                insights.
+        <!-- ============ SELECTED WORK ============ -->
+        <section id="work" class="section-gap">
+            <span class="kicker" data-reveal>Selected Work</span>
+            <h2 class="section-title" data-reveal style="--d: 0.05s;">Selected <span class="serif-accent">projects.</span></h2>
+            <p class="lede" data-reveal style="--d: 0.08s; margin-bottom: 2.4rem;">
+                A real-time multiplayer strategy game, a mobile music-discovery app, and a
+                geospatial analysis — each designed, built, and shipped end-to-end.
             </p>
-            <div style="display: flex; gap: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">
-                <a href="https://kaiwenli2007.github.io/MegaGem_Live/" target="_blank"
-                    style="color: var(--highlight); text-decoration: none; border: 1px solid var(--border); padding: 0.5rem 1rem; border-radius: 6px; background: var(--card);">~/Landing
-                    Page</a>
-                <a href="https://megagem-live.onrender.com" target="_blank"
-                    style="color: var(--highlight); text-decoration: none; border: 1px solid var(--border); padding: 0.5rem 1rem; border-radius: 6px; background: var(--card);">~/Live
-                    Game</a>
+
+            <div style="display: grid; gap: 18px;">
+                <a href="megagem.html" class="glass-card project-card" data-reveal>
+                    <span class="proj-num">01 / GAME · AI</span>
+                    <h3 class="proj-name">MegaGem Live <span class="go">↗</span></h3>
+                    <p class="proj-desc">
+                        An interactive auction strategy game — one human versus two AI players. Bid on
+                        hidden gem signals to optimize end-round value. Built from scratch with Python
+                        (Flask / Socket.IO) and Vanilla JavaScript, featuring real-time multiplayer bidding,
+                        automated AI opponents, and a Gemini-powered in-game tutor with live predictions.
+                    </p>
+                    <ul class="chip-row">
+                        <li class="chip">Python</li>
+                        <li class="chip">Flask</li>
+                        <li class="chip">Socket.IO</li>
+                        <li class="chip">Gemini AI</li>
+                        <li class="chip">Vanilla JS</li>
+                    </ul>
+                </a>
+
+                <a href="bingbeats.html" class="glass-card project-card" data-reveal style="--d: 0.08s;">
+                    <span class="proj-num">02 / MOBILE · MUSIC</span>
+                    <h3 class="proj-name">Bing Beats <span class="go">↗</span></h3>
+                    <p class="proj-desc">
+                        An Expo + React Native app for discovering music by place and time. Pick a country
+                        and a year, explore tracks, and chat with an assistant that suggests playlist-style
+                        results in context.
+                    </p>
+                    <ul class="chip-row">
+                        <li class="chip">React Native</li>
+                        <li class="chip">Expo Router</li>
+                        <li class="chip">Node.js</li>
+                        <li class="chip">AI Assistant</li>
+                    </ul>
+                </a>
+
+                <a href="https://arcg.is/04Xv9r" target="_blank" class="glass-card project-card" data-reveal
+                    style="--d: 0.16s;">
+                    <span class="proj-num">03 / DATA · GIS</span>
+                    <h3 class="proj-name">Asset Management Project <span class="go">↗</span></h3>
+                    <p class="proj-desc">
+                        A geospatial asset-management story map built on the ArcGIS platform —
+                        externally hosted, opens in a new tab.
+                    </p>
+                    <ul class="chip-row">
+                        <li class="chip">ArcGIS</li>
+                        <li class="chip">Story Map</li>
+                        <li class="chip">Data Viz</li>
+                    </ul>
+                </a>
             </div>
+        </section>
+
+        <!-- ============ CONTACT CTA ============ -->
+        <section class="section-gap" style="text-align: center;">
+            <h2 class="display" data-reveal style="font-size: clamp(2.2rem, 6vw, 4rem);">
+                Let's <em>talk.</em>
+            </h2>
+            <p class="lede" data-reveal style="--d: 0.08s; margin: 0 auto 2.4rem;">
+                Open to research, teaching, and quantitative opportunities.
+            </p>
+            <div class="btn-row" data-reveal style="--d: 0.16s; justify-content: center;">
+                <a class="btn btn-primary" href="mailto:kl5@andrew.cmu.edu">kl5@andrew.cmu.edu <span
+                        class="arrow">→</span></a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <span class="foot-name">Kaiwen Li</span>
+        <div class="foot-meta">
+            <a href="mailto:kl5@andrew.cmu.edu">kl5@andrew.cmu.edu</a>
+            <span>1-412-891-5688</span>
+            <span>Pittsburgh, PA</span>
         </div>
-    </div>
+    </footer>
+
+    <script src="site.js"></script>
+    <script src="signature.js"></script>
 </body>
 
 </html>
