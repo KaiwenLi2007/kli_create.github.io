@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -)",
+      "Bash(rm news.html todo.html habits.html)",
+      "Bash(python3 -m http.server 8931 --bind 127.0.0.1)",
+      "Bash(python3 -c \"import playwright\")",
+      "Bash(npx playwright *)",
+      "Bash(python3 -c ' *)",
+      "Bash(grep -n '`' signature.js)",
+      "Bash(grep -v '\\\\${')",
+      "Bash(gh auth *)",
+      "Bash(git config *)",
+      "Read(//home/kaiwen/**)",
+      "Read(//mnt/c/Program Files/Git/mingw64/bin/**)",
+      "Read(//mnt/c/Program Files/Git/mingw64/libexec/git-core/**)",
+      "Read(//mnt/c/Users/kaiwe/AppData/Local/Programs/Git/mingw64/bin/**)"
+    ]
+  }
+}
