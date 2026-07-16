@@ -31,7 +31,8 @@
       "Bash(python3 \"/tmp/claude-1000/-mnt-c-Users-kaiwe-OneDrive-Documents-GitHub-kli-create-github-io/febc09c4-04bb-4ce7-ab57-cce47cfbda43/scratchpad/nav.py\")",
       "Bash(git rm *)",
       "Bash(awk '{o+=gsub\\(/{/,\"{\"\\); c+=gsub\\(/}/,\"}\"\\)} END{print \\(o==c?\"CSS BALANCED \"o:\"CSS MISMATCH \"o\"/\"c\\)}' styles.css)",
-      "Bash(awk '{o+=gsub\\(/{/,\"{\"\\); c+=gsub\\(/}/,\"}\"\\)} END{print \\(o==c?\"BALANCED \"o:\"MISMATCH \"o\"/\"c\\)}' styles.css)"
+      "Bash(awk '{o+=gsub\\(/{/,\"{\"\\); c+=gsub\\(/}/,\"}\"\\)} END{print \\(o==c?\"BALANCED \"o:\"MISMATCH \"o\"/\"c\\)}' styles.css)",
+      "Bash(curl -s -o /dev/null -w \"server: %{http_code}\\\\n\" http://127.0.0.1:8931/index.html)"
     ]
   }
 }

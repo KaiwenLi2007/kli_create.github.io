@@ -466,11 +466,22 @@ body {
     font-style: italic;
     font-weight: 400;
     letter-spacing: -0.01em;
-    background: var(--grad-text);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
     padding-right: 0.06em;
+    /* solid fallback first — if background-clip:text fails to (re)apply
+       during a repaint (GPU compositing edge case on transform/opacity
+       transitions), the word stays ink-colored instead of vanishing */
+    color: var(--ink);
+}
+
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+    .display em,
+    .serif-accent {
+        background: var(--grad-text);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
 }
 
 .lede {
@@ -1349,19 +1360,51 @@ code {
 .bio-social {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.4rem;
-    margin-top: 1.2rem;
+    gap: 0.7rem;
+    margin-top: 1.3rem;
 }
 
-.bio-social a {
-    font-family: var(--font-mono);
-    font-size: 0.82rem;
-    color: var(--sub);
-    border-bottom: none;
-}
-
-.bio-social a:hover {
+.social-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 600;
     color: var(--ink);
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    padding: 0.45rem 1.15rem 0.45rem 0.5rem;
+    text-decoration: none;
+    background: rgba(var(--tint-rgb), 0.03);
+    transition: background 0.25s, border-color 0.25s, transform 0.25s var(--ease-out), color 0.25s;
+}
+
+.social-btn .social-ico {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 700;
+    transition: background 0.25s, color 0.25s;
+}
+
+.social-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.social-btn:hover .social-ico {
+    background: var(--accent);
+    color: #fff;
 }
 
 /* compact the stats when they sit in the About bio column */

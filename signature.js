@@ -439,7 +439,7 @@
 
     function boot() {
         print(BANNER, "t-banner");
-        print("portfolio-shell v1.0 — Kaiwen Li, Math & CS @ CMU", "t-acc");
+        print("portfolio-shell v1.0 — Kaiwen Li, Mathematics @ CMU", "t-acc");
         print("type 'help' to see what this thing can do.", "t-dim");
         print("");
     }
@@ -561,18 +561,20 @@
                 break;
 
             case "whoami":
-                print("Kaiwen Li — Mathematics & Computer Science @ Carnegie Mellon, Class of 2029.");
-                print("USAMO qualifier · snowboard coach · builder of games and apps.", "t-dim");
+                print("Kaiwen Li — Mathematics (Discrete Math & Logic) @ Carnegie Mellon, Class of 2029.");
+                print("USAMO qualifier · constructive-logic researcher · builder of games and apps.", "t-dim");
                 break;
 
             case "resume":
             case "cat":
-                print("KAIWEN LI — Math & CS, Carnegie Mellon University '29", "t-acc");
+                print("KAIWEN LI — Mathematics (Discrete Math & Logic), CMU '29", "t-acc");
                 print("  kl5@andrew.cmu.edu · 1-412-891-5688 · Pittsburgh, PA", "t-dim");
-                print("EDUCATION    CMU, B.S. (exp. May 2029) · Lord Byng Secondary (96/100)");
-                print("HONORS       USAMO Qualifier '24 · 3× AIME (best 12/15) · Euclid top 2.5%");
-                print("PROJECTS     MegaGem Live · Bing Beats · ArcGIS Asset Management");
-                print("EXPERIENCE   Snowboard Instructor (CASI) · TA @ Kerrisdale Academy");
+                print("EDUCATION    CMU, B.S. Mathematics — Discrete Math & Logic (exp. May 2029)");
+                print("             QPA 3.74/4.00 · Dean's List ×2 · Lord Byng Secondary (96/100)");
+                print("RESEARCH     Constructive logic & theoretical CS — Prof. Richard Statman");
+                print("HONORS       USAMO Qualifier · 2× AMC 12 HRD (top 1%) · 3× AIME (12/15) · Euclid top 2.5%");
+                print("PROJECTS     Bing Beats · MegaGem Live · Asset Management Research");
+                print("EXPERIENCE   Quant Market Making (3rd/35+) · TA @ Kerrisdale · Snowboard Instructor (CASI)");
                 print("PROGRAMS     SUMaC (Stanford) · UBC Math Circle · NSLC Engineering");
                 break;
 
