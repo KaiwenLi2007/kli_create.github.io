@@ -13,6 +13,10 @@
 (function () {
     "use strict";
 
+    /* theme + shared motion state (owned by site.js; light "paper" is default) */
+    const isLight = () => document.documentElement.getAttribute("data-theme") !== "dark";
+    const motion = window.__klMotion || { energy: 0, hue: 210 };
+
     /* ---------- shared cursor (own lerp, independent of site.js) ---------- */
     const cur = { x: innerWidth / 2, y: innerHeight / 2, nx: 0, ny: 0, tx: 0, ty: 0, active: false };
     addEventListener("pointermove", (e) => {
@@ -148,11 +152,13 @@
                 const e = energy[i];
                 if (e < 0.02) continue;
                 // young cells cyan → mature cells indigo
+                // young cells bloom into colour where the cursor sows them,
+                // then settle into mono ink as they age
                 const t = Math.min(age[i] / 40, 1);
-                const R = Math.round(103 + (129 - 103) * t);
-                const G = Math.round(232 + (140 - 232) * t);
-                const B = Math.round(249 + (248 - 249) * t);
-                ctx.fillStyle = `rgba(${R}, ${G}, ${B}, ${e * 0.11})`;
+                const sat = Math.round((1 - t) * motion.energy * 88);
+                const light = isLight() ? (46 - t * 27) : (90 - t * 20);
+                const hue = (motion.hue + i * 0.7) % 360;
+                ctx.fillStyle = `hsla(${hue}, ${sat}%, ${light}%, ${e * (isLight() ? 0.17 : 0.12)})`;
                 ctx.fillRect(c * CS + pad, r * CS + pad, sz, sz);
             }
         }
@@ -270,22 +276,109 @@
             const p = proj[a], q = proj[b];
             const d = (p.d + q.d) / 2;
             const t = Math.max(0, Math.min(1, (d - 0.7) / 1.1));
-            const cR = Math.round(129 + (103 - 129) * t);
-            const cG = Math.round(140 + (232 - 140) * t);
-            const cB = Math.round(248 + (249 - 248) * t);
+            // depth drives lightness/thickness; motion drives colour
+            const act = Math.min(1, motion.energy * 0.9 + spinBoost * 0.5);
+            const hue = (motion.hue + t * 40) % 360;
+            const el = isLight() ? (30 - t * 10) : (55 + t * 35);
+            const al = (0.10 + t * 0.24) * (isLight() ? 1.5 : 1);
             tctx.beginPath();
             tctx.moveTo(p.x, p.y);
             tctx.lineTo(q.x, q.y);
-            tctx.strokeStyle = `rgba(${cR}, ${cG}, ${cB}, ${0.08 + t * 0.22})`;
+            tctx.strokeStyle = `hsla(${hue}, ${Math.round(act * 85)}%, ${el}%, ${al})`;
             tctx.lineWidth = 0.7 + t * 1.1;
             tctx.stroke();
         }
         for (const p of proj) {
             const t = Math.max(0, Math.min(1, (p.d - 0.7) / 1.1));
+            const act = Math.min(1, motion.energy * 0.9 + spinBoost * 0.5);
+            const hue = (motion.hue + t * 40) % 360;
+            const el = isLight() ? (22 - t * 6) : (78 + t * 18);
             tctx.beginPath();
             tctx.arc(p.x, p.y, 1.4 + t * 1.8, 0, Math.PI * 2);
-            tctx.fillStyle = `rgba(165, 180, 252, ${0.25 + t * 0.5})`;
+            tctx.fillStyle = `hsla(${hue}, ${Math.round(act * 80)}%, ${el}%, ${0.28 + t * 0.5})`;
             tctx.fill();
+        }
+    }
+
+    /* ============================================================
+       GLOBE — a rotating Fibonacci sphere of points (terminal: globe)
+       ============================================================ */
+    const globe = { on: false, cv: null, ctx: null, W: 0, H: 0, pts: [], rot: 0, fade: 0 };
+
+    // distribute unit-sphere points along the golden spiral
+    (function buildGlobe() {
+        const N = 2000;
+        const golden = Math.PI * (3 - Math.sqrt(5));
+        for (let i = 0; i < N; i++) {
+            const y = 1 - (i / (N - 1)) * 2;
+            const r = Math.sqrt(Math.max(0, 1 - y * y));
+            const th = i * golden;
+            globe.pts.push([Math.cos(th) * r, y, Math.sin(th) * r]);
+        }
+    })();
+
+    function ensureGlobe() {
+        if (globe.cv) return;
+        const cv = document.createElement("canvas");
+        cv.className = "globe-canvas";
+        document.body.appendChild(cv);
+        globe.cv = cv;
+        globe.ctx = cv.getContext("2d");
+        const fit = () => {
+            const dpr = Math.min(devicePixelRatio || 1, 2);
+            globe.W = innerWidth; globe.H = innerHeight;
+            cv.width = globe.W * dpr;
+            cv.height = globe.H * dpr;
+            globe.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        };
+        fit();
+        addEventListener("resize", fit);
+    }
+
+    function drawGlobe() {
+        const ctx = globe.ctx;
+        if (!ctx) return;
+        const target = globe.on ? 1 : 0;
+        globe.fade += (target - globe.fade) * 0.07;
+        if (!globe.on && globe.fade < 0.004) {
+            ctx.clearRect(0, 0, globe.W, globe.H);
+            globe.cv.style.opacity = "0";
+            return;
+        }
+        globe.cv.style.opacity = "1";
+        ctx.clearRect(0, 0, globe.W, globe.H);
+
+        const cx = globe.W / 2, cy = globe.H / 2;
+        const R = Math.min(globe.W, globe.H) * 0.36 * (0.55 + 0.45 * globe.fade);
+        const light = isLight();
+
+        // faint halo lifts the sphere off the page
+        const g = ctx.createRadialGradient(cx, cy, R * 0.15, cx, cy, R * 1.25);
+        g.addColorStop(0, `rgba(${light ? "20, 18, 12" : "255, 255, 255"}, ${0.05 * globe.fade})`);
+        g.addColorStop(1, "transparent");
+        ctx.fillStyle = g;
+        ctx.fillRect(cx - R * 1.3, cy - R * 1.3, R * 2.6, R * 2.6);
+
+        // spin from its own idle drift + a launch burst + cursor energy; tilt follows cursor
+        globe.rot += 0.004 + motion.energy * 0.02 + spinBoost * 0.004;
+        const tilt = 0.45 + cur.ny * 0.5;
+        const ca = Math.cos(globe.rot), sa = Math.sin(globe.rot);
+        const ct = Math.cos(tilt), st = Math.sin(tilt);
+        const sat = Math.round(motion.energy * 88);
+
+        for (const [x0, y0, z0] of globe.pts) {
+            const x = x0 * ca + z0 * sa;         // rotate around Y
+            let z = -x0 * sa + z0 * ca;
+            const y = y0 * ct - z * st;          // tilt around X
+            z = y0 * st + z * ct;
+            const depth = (z + 1) / 2;           // 0 back → 1 front
+            const size = (0.55 + depth * 1.7) * (0.7 + 0.3 * globe.fade);
+            const a = (0.1 + depth * 0.62) * globe.fade;
+            const l = light ? (32 - depth * 20) : (52 + depth * 43);
+            ctx.beginPath();
+            ctx.arc(cx + x * R, cy + y * R, size, 0, Math.PI * 2);
+            ctx.fillStyle = `hsla(${(motion.hue + depth * 30) % 360}, ${sat}%, ${l}%, ${a})`;
+            ctx.fill();
         }
     }
 
@@ -368,8 +461,15 @@
             e.preventDefault();
             setTerm(!term.classList.contains("open"));
         }
-        if (e.key === "Escape" && term.classList.contains("open")) setTerm(false);
+        if (e.key === "Escape") {
+            if (term.classList.contains("open")) setTerm(false);
+            if (globe.on) globe.on = false;
+        }
     });
+
+    // the hero "prompt line" (home page) opens the terminal
+    const heroPrompt = document.querySelector(".hero-prompt");
+    if (heroPrompt) heroPrompt.addEventListener("click", () => setTerm(true));
 
     /* ----- math helpers ----- */
     function isPrime(n) {
@@ -416,15 +516,15 @@
     ];
 
     const PAGES = {
-        home: "index.html", education: "education.html", experience: "experience.html",
-        math: "honors.html", mathematics: "honors.html", honors: "honors.html",
+        home: "index.html", experience: "experience.html", education: "experience.html",
+        achievements: "honors.html", math: "honors.html", mathematics: "honors.html", honors: "honors.html",
         interests: "interests.html", megagem: "megagem.html",
         bingbeats: "bingbeats.html", beats: "bingbeats.html",
         assets: "https://arcg.is/04Xv9r",
     };
 
     const COMMANDS = ["help", "whoami", "resume", "contact", "ls", "open", "prove",
-        "prime", "collatz", "fib", "life", "glider", "spin", "clear",
+        "prime", "collatz", "fib", "life", "glider", "spin", "globe", "clear",
         "history", "pwd", "date", "echo", "exit"];
 
     function exec(raw) {
@@ -455,6 +555,7 @@
                 print("  life on|off|soup   control the Game of Life background");
                 print("  glider [n]      launch gliders into the grid");
                 print("  spin            overclock the 4D tesseract (home page)");
+                print("  globe           summon a rotating globe of points");
                 print("system", "t-acc");
                 print("  clear · history · pwd · date · echo · exit");
                 break;
@@ -482,8 +583,8 @@
                 break;
 
             case "ls":
-                print("home/  education/  experience/  mathematics/  interests/", "t-cy");
-                print("megagem/  bingbeats/  assets/ (external)", "t-cy");
+                print("home/  experience/  achievements/  interests/", "t-cy");
+                print("bingbeats/  megagem/  assets/ (external)", "t-cy");
                 break;
 
             case "open": {
@@ -564,7 +665,7 @@
             }
 
             case "glider": {
-                const n = Math.min(Number(args[0]) || 3, 25);
+                const n = Math.max(1, Math.min(Number(args[0]) || 3, 25));
                 for (let i = 0; i < n; i++) {
                     stampGlider(Math.random() * innerWidth, Math.random() * innerHeight);
                 }
@@ -580,6 +681,23 @@
                     print("no tesseract on this page — it lives on the home page.", "t-dim");
                 }
                 break;
+
+            case "globe":
+            case "sphere":
+            case "earth": {
+                ensureGlobe();
+                const sub = (args[0] || "").toLowerCase();
+                if (sub === "off") {
+                    globe.on = false;
+                    print("globe dismissed.", "t-dim");
+                } else {
+                    globe.on = true;
+                    spinBoost = Math.max(spinBoost, 8);
+                    print("2,000 points on a sphere. move the cursor to spin and tilt it.", "t-cy");
+                    print("`globe off` or Esc to dismiss.", "t-dim");
+                }
+                break;
+            }
 
             case "clear":
                 out.innerHTML = "";
@@ -678,6 +796,7 @@
         }
         lifeRender();
         drawTesseract();
+        if (globe.cv) drawGlobe();
         requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);

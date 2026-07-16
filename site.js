@@ -11,6 +11,22 @@
     const reduceMotion = false;
     const finePointer = window.matchMedia("(pointer: fine)").matches;
 
+    /* ---------- Theme: light "paper" is the default, dark is the alternate ---------- */
+    const root = document.documentElement;
+    try {
+        if (localStorage.getItem("kl-theme") === "dark") root.setAttribute("data-theme", "dark");
+    } catch (e) { /* storage may be blocked */ }
+    const isLight = () => root.getAttribute("data-theme") !== "dark";
+
+    /* ---------- Motion → colour ------------------------------------------------
+       The page is monochrome at rest; colour is earned by movement. `energy`
+       rises with cursor speed and decays every frame; `hue` tracks the pointer's
+       x position (cool on the left → warm on the right). Shared with
+       signature.js through window.__klMotion. */
+    const motion = { energy: 0, hue: 210 };
+    window.__klMotion = motion;
+    let lastMX = null, lastMY = null;
+
     /* ---------- Cursor state (shared, lerped) ---------- */
     const mouse = { px: -9999, py: -9999, active: false };
     let targetNX = 0, targetNY = 0;
@@ -22,6 +38,13 @@
         mouse.active = true;
         targetNX = e.clientX / window.innerWidth - 0.5;
         targetNY = e.clientY / window.innerHeight - 0.5;
+        if (lastMX !== null) {
+            const sp = Math.hypot(e.clientX - lastMX, e.clientY - lastMY);
+            motion.energy = Math.min(1, motion.energy + sp / 210);
+        }
+        lastMX = e.clientX;
+        lastMY = e.clientY;
+        motion.hue = 205 - (e.clientX / window.innerWidth) * 190;
     }, { passive: true });
 
     window.addEventListener("pointerleave", () => {
@@ -76,8 +99,17 @@
     function moveWords() {
         if (!movers.length) return;
         const vh2 = window.innerHeight;
-        for (const m of movers) {
-            const r = m.el.getBoundingClientRect();
+        // Pass 1 — read all layout up front. Keeping every getBoundingClientRect
+        // together (before any transform write) avoids the read-after-write that
+        // forces a synchronous reflow per character while the page is scrolling.
+        const rects = new Array(movers.length);
+        for (let i = 0; i < movers.length; i++) {
+            rects[i] = movers[i].el.getBoundingClientRect();
+        }
+        // Pass 2 — compute offsets and write transforms.
+        for (let i = 0; i < movers.length; i++) {
+            const m = movers[i];
+            const r = rects[i];
             // skip off-screen text, gently settle any leftover offset
             if (r.bottom < -80 || r.top > vh2 + 80) {
                 if (m.ox || m.oy) {
@@ -148,7 +180,10 @@
 
         // Click ripples — expanding rings from the pointer
         window.addEventListener("pointerdown", (e) => {
-            ripples.push({ x: e.clientX, y: e.clientY, r: 6, a: 0.45 });
+            // a click is deliberate interaction — burst energy so the ring is colourful
+            motion.energy = Math.min(1, motion.energy + 0.6);
+            const hue = 205 - (e.clientX / window.innerWidth) * 190;
+            ripples.push({ x: e.clientX, y: e.clientY, r: 6, a: 0.45, hue });
             // give nearby particles a gentle shove outward
             for (const p of pts) {
                 const dx = p.x - e.clientX, dy = p.y - e.clientY;
@@ -165,6 +200,15 @@
     const LINK_DIST = 110;
     const CURSOR_DIST = 230;
     const REPEL_DIST = 150;
+
+    // resting marks are pure ink (dark on paper / light on black)
+    const inkRGB = () => (isLight() ? "20, 18, 12" : "236, 234, 228");
+    // interaction marks gain hue with motion.energy; fall back to grey when still
+    const liveColor = (alpha, boost) => {
+        const s = Math.round(Math.min(1, motion.energy * (boost || 1)) * 92);
+        const l = isLight() ? 46 : 62;
+        return `hsla(${motion.hue.toFixed(0)}, ${s}%, ${l}%, ${alpha})`;
+    };
 
     function drawNet() {
         if (!ctx) return;
@@ -197,7 +241,7 @@
 
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(165, 180, 252, 0.5)";
+            ctx.fillStyle = `rgba(${inkRGB()}, 0.42)`;
             ctx.fill();
         }
 
@@ -212,7 +256,7 @@
                     ctx.beginPath();
                     ctx.moveTo(pts[i].x, pts[i].y);
                     ctx.lineTo(pts[j].x, pts[j].y);
-                    ctx.strokeStyle = `rgba(148, 163, 253, ${0.16 * (1 - d / LINK_DIST)})`;
+                    ctx.strokeStyle = `rgba(${inkRGB()}, ${0.16 * (1 - d / LINK_DIST)})`;
                     ctx.lineWidth = 1;
                     ctx.stroke();
                 }
@@ -227,7 +271,7 @@
                     ctx.beginPath();
                     ctx.moveTo(mouse.px, mouse.py);
                     ctx.lineTo(p.x, p.y);
-                    ctx.strokeStyle = `rgba(103, 232, 249, ${0.38 * (1 - d / CURSOR_DIST)})`;
+                    ctx.strokeStyle = liveColor(0.5 * (1 - d / CURSOR_DIST), 1.5);
                     ctx.lineWidth = 1;
                     ctx.stroke();
                 }
@@ -245,7 +289,7 @@
             }
             ctx.beginPath();
             ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(129, 140, 248, ${rp.a})`;
+            ctx.strokeStyle = `hsla(${rp.hue.toFixed(0)}, 82%, ${isLight() ? 48 : 62}%, ${rp.a})`;
             ctx.lineWidth = 1.4;
             ctx.stroke();
         }
@@ -266,9 +310,25 @@
     }
     let gx = window.innerWidth / 2, gy = window.innerHeight / 2;
 
+    /* ---------- Theme toggle (paper ⇄ dark) ---------- */
+    const themeBtn = document.createElement("button");
+    themeBtn.className = "theme-toggle";
+    themeBtn.setAttribute("aria-label", "Toggle light or dark theme");
+    const paintThemeBtn = () => { themeBtn.textContent = isLight() ? "☾" : "☀"; };
+    paintThemeBtn();
+    themeBtn.addEventListener("click", () => {
+        const goDark = isLight();
+        if (goDark) root.setAttribute("data-theme", "dark");
+        else root.removeAttribute("data-theme");
+        try { localStorage.setItem("kl-theme", goDark ? "dark" : "light"); } catch (e) { /* ignore */ }
+        paintThemeBtn();
+    });
+    document.body.appendChild(themeBtn);
+
     function frame() {
         nx += (targetNX - nx) * 0.06;
         ny += (targetNY - ny) * 0.06;
+        motion.energy *= 0.94;              // colour fades back to mono when you stop
         const sy = window.scrollY;
 
         orbs.forEach((orb, i) => {
@@ -289,6 +349,11 @@
             gx += (mouse.px - gx) * 0.12;
             gy += (mouse.py - gy) * 0.12;
             glow.style.transform = `translate(${gx}px, ${gy}px)`;
+            // the glow is invisible at rest and blooms into colour as you move
+            const a = (motion.energy * 0.34).toFixed(3);
+            const s = Math.round(40 + motion.energy * 55);
+            glow.style.background =
+                `radial-gradient(circle, hsla(${motion.hue.toFixed(0)}, ${s}%, ${isLight() ? 52 : 60}%, ${a}), transparent 70%)`;
         }
 
         moveWords();

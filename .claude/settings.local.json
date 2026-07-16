@@ -14,7 +14,24 @@
       "Read(//home/kaiwen/**)",
       "Read(//mnt/c/Program Files/Git/mingw64/bin/**)",
       "Read(//mnt/c/Program Files/Git/mingw64/libexec/git-core/**)",
-      "Read(//mnt/c/Users/kaiwe/AppData/Local/Programs/Git/mingw64/bin/**)"
+      "Read(//mnt/c/Users/kaiwe/AppData/Local/Programs/Git/mingw64/bin/**)",
+      "Bash(grep -nA12 \"\\\\.portrait-frame\" styles.css)",
+      "Bash(grep -nE \"case \\\\\"|cmd ===|COMMANDS|/\\\\* -{3,}\" signature.js)",
+      "Bash(python scripts/pr_analyzer.py /mnt/c/Users/kaiwe/OneDrive/Documents/GitHub/kli_create.github.io --base 4c5a927 --head 1b029e2)",
+      "Bash(python3 /home/kaiwen/.claude/plugins/cache/claude-code-skills/engineering-skills/2.9.0/skills/code-reviewer/scripts/code_quality_checker.py /mnt/c/Users/kaiwe/OneDrive/Documents/GitHub/kli_create.github.io/site.js)",
+      "Bash(node --check site.js)",
+      "Bash(node --check signature.js)",
+      "Bash(python3 \"/tmp/claude-1000/-mnt-c-Users-kaiwe-OneDrive-Documents-GitHub-kli-create-github-io/febc09c4-04bb-4ce7-ab57-cce47cfbda43/scratchpad/favicon.py\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:8931/index.html)",
+      "Bash(node -e \"require\\('playwright'\\)\")",
+      "Bash([ -f \"$MEM\" ])",
+      "Bash(awk '{o+=gsub\\(/{/,\"{\"\\); c+=gsub\\(/}/,\"}\"\\)} END{print \"open=\"o\" close=\"c\" \"\\(o==c?\"BALANCED\":\"MISMATCH\"\\)}' styles.css)",
+      "Bash(curl -s http://127.0.0.1:8931/styles.css)",
+      "Bash(curl -s -o /dev/null -w \"index: %{http_code}\\\\n\" http://127.0.0.1:8931/index.html)",
+      "Bash(python3 \"/tmp/claude-1000/-mnt-c-Users-kaiwe-OneDrive-Documents-GitHub-kli-create-github-io/febc09c4-04bb-4ce7-ab57-cce47cfbda43/scratchpad/nav.py\")",
+      "Bash(git rm *)",
+      "Bash(awk '{o+=gsub\\(/{/,\"{\"\\); c+=gsub\\(/}/,\"}\"\\)} END{print \\(o==c?\"CSS BALANCED \"o:\"CSS MISMATCH \"o\"/\"c\\)}' styles.css)",
+      "Bash(awk '{o+=gsub\\(/{/,\"{\"\\); c+=gsub\\(/}/,\"}\"\\)} END{print \\(o==c?\"BALANCED \"o:\"MISMATCH \"o\"/\"c\\)}' styles.css)"
     ]
   }
 }
