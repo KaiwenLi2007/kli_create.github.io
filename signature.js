@@ -570,7 +570,7 @@
                 print("KAIWEN LI — Mathematics (Discrete Math & Logic), CMU '29", "t-acc");
                 print("  kl5@andrew.cmu.edu · 1-412-891-5688 · Pittsburgh, PA", "t-dim");
                 print("EDUCATION    CMU, B.S. Mathematics — Discrete Math & Logic (exp. May 2029)");
-                print("             QPA 3.74/4.00 · Dean's List ×2 · Lord Byng Secondary (96/100)");
+                print("             Dean's List ×2 · Lord Byng Secondary (96/100)");
                 print("RESEARCH     Constructive logic & theoretical CS — Prof. Richard Statman");
                 print("HONORS       USAMO Qualifier · 2× AMC 12 HRD (top 1%) · 3× AIME (12/15) · Euclid top 2.5%");
                 print("PROJECTS     Bing Beats · MegaGem Live · Asset Management Research");
