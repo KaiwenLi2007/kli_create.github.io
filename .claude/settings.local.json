@@ -32,7 +32,8 @@
       "Bash(git rm *)",
       "Bash(awk '{o+=gsub\\(/{/,\"{\"\\); c+=gsub\\(/}/,\"}\"\\)} END{print \\(o==c?\"CSS BALANCED \"o:\"CSS MISMATCH \"o\"/\"c\\)}' styles.css)",
       "Bash(awk '{o+=gsub\\(/{/,\"{\"\\); c+=gsub\\(/}/,\"}\"\\)} END{print \\(o==c?\"BALANCED \"o:\"MISMATCH \"o\"/\"c\\)}' styles.css)",
-      "Bash(curl -s -o /dev/null -w \"server: %{http_code}\\\\n\" http://127.0.0.1:8931/index.html)"
+      "Bash(curl -s -o /dev/null -w \"server: %{http_code}\\\\n\" http://127.0.0.1:8931/index.html)",
+      "mcp__plugin_playwright_playwright__browser_navigate"
     ]
   }
 }
