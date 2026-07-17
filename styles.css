@@ -1155,6 +1155,46 @@ code {
     }
 }
 
+/* Hero signature name + rotating identity headline (home page) */
+.hero-signature {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--sub);
+    margin: 0 0 1.4rem;
+    padding-left: 0.36em; /* optical balance for the tracking */
+    animation: rise 1s var(--ease-out) 0.15s both;
+}
+
+.hero-headline {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2.3rem, 7vw, 5rem);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin: 0;
+    color: var(--ink);
+    min-height: 2.2em; /* reserve room so the CTA below never jumps as text types */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: rise 1s var(--ease-out) 0.3s both;
+}
+
+.hero-headline .hl-lead { color: var(--sub); }
+.hero-headline .hl-type { color: var(--ink); }
+.hero-headline .hl-caret {
+    color: var(--accent);
+    font-weight: 400;
+    margin-left: 0.02em;
+    animation: caret-blink 1.05s steps(1) infinite;
+}
+
+@keyframes caret-blink { 50% { opacity: 0; } }
+
 .hero-tag {
     font-family: var(--font-serif);
     font-style: italic;

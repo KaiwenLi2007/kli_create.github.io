@@ -786,6 +786,36 @@
     });
 
     /* ============================================================
+       HERO IDENTITY TYPEWRITER  (home page only — guards on element)
+       Types + retypes short "I ___" lines about who Kaiwen is.
+       textContent only — never innerHTML (see terminal contract).
+       ============================================================ */
+    (function heroTypewriter() {
+        const type = document.querySelector(".hl-type");
+        if (!type) return;
+        const phrases = [
+            "prove theorems.",
+            "research constructive logic.",
+            "build games & apps.",
+            "turn math into motion.",
+            "teach snowboarding.",
+        ];
+        let pi = 0, ci = 0, deleting = false;
+        function tick() {
+            const word = phrases[pi];
+            if (!deleting) {
+                type.textContent = word.slice(0, ++ci);
+                if (ci === word.length) { deleting = true; return setTimeout(tick, 1700); }
+                return setTimeout(tick, 52 + Math.random() * 46);
+            }
+            type.textContent = word.slice(0, --ci);
+            if (ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; return setTimeout(tick, 380); }
+            return setTimeout(tick, 26);
+        }
+        setTimeout(tick, 950);
+    })();
+
+    /* ============================================================
        MAIN LOOP
        ============================================================ */
     function loop(ts) {
