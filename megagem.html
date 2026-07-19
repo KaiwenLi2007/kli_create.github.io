@@ -54,58 +54,152 @@
     </div>
 
     <main class="page article">
-        <span class="kicker" data-reveal>Project 02 — Game · AI · Feb 2026</span>
+        <span class="kicker" data-reveal>Project 02 — Game · AI · 3D · Feb 2026</span>
         <h1 class="display" data-reveal style="--d: 0.05s;">MegaGem <em>Live.</em></h1>
         <p class="lede" data-reveal style="--d: 0.1s;">
-            Jane Street's board game <em>MegaGems</em>, ported into an interactive digital
-            simulation — one human versus two AI players. Read hidden gem signals, win key
-            auctions, and optimize final value.
+            An interactive auction-strategy game — one human against two AI bidders — played from a
+            first-person seat inside a neon 3D auction room. Nobody holds full information: read the
+            hidden gem signals, win the auctions that matter, and outscore the AI before the round ends.
         </p>
 
-        <div class="btn-row" data-reveal style="--d: 0.15s; margin-bottom: 2rem;">
+        <div class="btn-row" data-reveal style="--d: 0.15s; margin-bottom: 2.4rem;">
             <a class="btn btn-primary" href="https://megagem-live.onrender.com" target="_blank">Play the live game
                 <span class="arrow">→</span></a>
             <a class="btn btn-ghost" href="https://kaiwenli2007.github.io/MegaGem_Live/" target="_blank">Landing
                 page</a>
         </div>
 
+        <div class="stat-strip" data-reveal style="--d: 0.2s; margin-bottom: 1rem;">
+            <div class="stat"><div class="num">1 v 2</div><div class="lbl">Human vs AI bidders</div></div>
+            <div class="stat"><div class="num">30</div><div class="lbl">Gems · 5 types</div></div>
+            <div class="stat"><div class="num">15</div><div class="lbl">Hidden at round start</div></div>
+            <div class="stat"><div class="num">200+</div><div class="lbl">Simulated games verified</div></div>
+        </div>
+
         <div data-reveal>
             <p>
-                A port of Jane Street's board game <strong>MegaGems</strong>, built entirely from scratch
-                using <strong>Python (Flask / Socket.IO)</strong> and <strong>Vanilla JavaScript</strong>.
-                It features real-time multiplayer bidding, automated AI opponents, and an integrated
-                Gemini-powered AI Tutor offering in-game valuation insights and gameplay analysis.
+                MegaGem Live began as a flat 2D auction dashboard — a port of Jane Street's board game
+                <strong>MegaGems</strong> — and grew into a real-time game with AI opponents, an AI coach, and a
+                full first-person 3D room, built from scratch with <strong>Python (Flask / Socket.IO)</strong> and
+                <strong>vanilla JavaScript</strong>.
+            </p>
+            <p>
+                The core tension is <strong>hidden information</strong>. At the start of a round, half the gems are
+                pulled from play and secretly split between the three players, so everyone holds a piece of the
+                answer. A gem type's final value depends on <em>how many</em> of that type were removed — and the only
+                way to learn more is to win auctions, which forces you to reveal one of your own secrets to the table.
             </p>
 
-            <h2>Features</h2>
+            <h2>How it plays</h2>
             <ul>
-                <li><strong>Start Game</strong> — full game with real-time bidding, reveals, and end-round scoring.</li>
-                <li><strong>Play with Tutor</strong> — the same game plus an in-game coach (Gemini) and a
-                    <strong>prediction chart</strong> of estimated gem values from public info (via the QuickChart
-                    No-Code API).</li>
-                <li><strong>Learn How to Play</strong> — step-by-step tutorial and Q&amp;A with an AI tutor.</li>
+                <li><strong>3 players</strong> — you plus 2 AI bidders. Everyone starts with <strong>35 coins</strong>.</li>
+                <li><strong>30 gems</strong> across 5 types (Gold, Sapphire, Jade, Onyx, Opal), 6 of each. At round
+                    start <strong>15 are removed</strong> and dealt as private information — 5 per player.</li>
+                <li>A deck of <strong>action cards</strong> drives each auction — <em>Win 1 Gem</em>, <em>Win 2 Gems</em>,
+                    <em>Invest</em>, <em>Loan</em>. The highest bid wins and pays; ties break to the lower player ID.</li>
+                <li><strong>Winning costs information</strong> — you reveal one of your private removed gems to everyone,
+                    which shifts the whole table's estimate of what each type is ultimately worth.</li>
             </ul>
 
-            <h2>Tech Stack</h2>
+            <div class="code-block" data-reveal><span class="cm">// scored once, at end of round</span>
+gem value   = removed_count[type] &times; 4
+final score = coins + investments + bonuses &minus; loans + gem worth</div>
+
+            <p>
+                So the game is a constant balancing act: spend coins to win value and gather signals, but overpay
+                early — or leak the wrong secret at the wrong moment — and you hand the round to the AI.
+            </p>
+
+            <h2>Three ways in</h2>
             <ul>
-                <li><strong>Backend:</strong> Python, Flask, Flask-SocketIO, eventlet</li>
-                <li><strong>AI:</strong> Google Gemini (tutor + in-game coach + AI bidders)</li>
-                <li><strong>Frontend:</strong> Vanilla JS, Socket.IO client</li>
-                <li><strong>Charts:</strong> QuickChart API</li>
+                <li><strong>Start Game</strong> — the full real-time auction: live bidding, reveals, and end-round scoring.</li>
+                <li><strong>Play with Tutor</strong> — the same game with an AI coach on its own wall screen, offering
+                    tips and answering strategy questions mid-round.</li>
+                <li><strong>Learn How to Play</strong> — a step-by-step tutorial plus a Q&amp;A chat with an AI tutor.</li>
             </ul>
 
-            <h2>Game Rules (Short)</h2>
+            <h2>Inside the 3D room</h2>
+            <p>
+                The 3D upgrade was deliberately <strong>decoupled</strong> from the game so the graphics could be bolted
+                on without touching a line of game logic. Four layers, each with one job — and because the backend
+                broadcasts the exact same events it did for the original 2D dashboard, the whole room is effectively a
+                presentation skin (a <em>Flat 2D mode</em> in settings switches it off entirely).
+            </p>
+
+            <div class="bento" style="margin: 1.4rem 0 0.5rem;">
+                <div class="glass-card span-3" data-tilt data-reveal>
+                    <span class="card-label">The Brain</span>
+                    <h3 class="card-title">Flask + Socket.IO</h3>
+                    <p class="card-desc">Runs all game logic, resolves bids, and broadcasts events. It has no idea the
+                        frontend is 3D.</p>
+                </div>
+                <div class="glass-card span-3" data-tilt data-reveal style="--d: 0.06s;">
+                    <span class="card-label">The Stage</span>
+                    <h3 class="card-title">Three.js · WebGL</h3>
+                    <p class="card-desc">Renders the physical room — desk, lighting, and the spinning gems that mirror
+                        the live gem queue.</p>
+                </div>
+                <div class="glass-card span-3" data-tilt data-reveal style="--d: 0.12s;">
+                    <span class="card-label">The Illusionist</span>
+                    <h3 class="card-title">CSS3DRenderer</h3>
+                    <p class="card-desc">Folds ordinary HTML — the bid form, leaderboard, and auction log — <em>inside</em>
+                        the 3D space as interactive panels, not flat textures.</p>
+                </div>
+                <div class="glass-card span-3" data-tilt data-reveal style="--d: 0.18s;">
+                    <span class="card-label">The Messenger</span>
+                    <h3 class="card-title">Socket.IO client</h3>
+                    <p class="card-desc">The connective tissue: it listens to the Brain, then tells the Stage to animate
+                        and the Illusionist to update.</p>
+                </div>
+            </div>
+
+            <h2>Tech stack</h2>
             <ul>
-                <li>3 players (you + 2 AI). Everyone starts with <strong>35 coins</strong>.</li>
-                <li><strong>30 gems</strong> (5 types: Gold, Sapphire, Jade, Onyx, Opal), 6 of each. At round start
-                    <strong>15 are removed</strong> and split as private info (5 per player).</li>
-                <li>Auctions use a deck of action cards (Win 1 Gem, Win 2 Gems, Invest, Loan, etc.). Highest bid wins
-                    and pays; ties go to the lower player ID.</li>
-                <li>When you win, you <strong>reveal one private removed gem</strong>; that info becomes public and
-                    affects everyone's estimates.</li>
-                <li><strong>Gem value</strong> at end of round = (total removed count for that type) × 4. Final score =
-                    coins + investment + bonus − loans + gem worth.</li>
+                <li><strong>Backend</strong> — Python, Flask, Flask-SocketIO, eventlet.</li>
+                <li><strong>Real-time</strong> — Socket.IO (WebSockets) for live bid / reveal / scoring events.</li>
+                <li><strong>AI</strong> — Google Gemini (<code>google-genai</code>) powers the AI bidders, the in-game
+                    coach, and the tutor, with a <strong>heuristic fallback</strong> when no API key is present.</li>
+                <li><strong>3D</strong> — Three.js (WebGL) for the room, plus CSS3DRenderer to fold real HTML panels
+                    into the scene.</li>
+                <li><strong>Frontend</strong> — vanilla JS, Socket.IO client, hand-built SVG gem art, and a custom
+                    canvas layer for sparkles, shockwaves, and confetti.</li>
+                <li><strong>Deploy</strong> — Docker and Render for the app; GitHub Pages for the static landing page.</li>
             </ul>
+
+            <h2>Engineering challenges</h2>
+            <ul>
+                <li><strong>The human seat kept locking players out.</strong> It was tied to a socket connection, so a
+                    refresh spawned a new socket and the game rejected the returning player. Fixed by binding the seat
+                    to a persistent client ID in <code>localStorage</code> — it now survives refreshes and transfers to
+                    a new client if the owner has no live connection.</li>
+                <li><strong>The gem queue could show an impossible state.</strong> A refill bug briefly displayed 3 gems
+                    when it should never exceed 2. Fixed by refilling <strong>one gem at a time</strong>, and verified
+                    across <strong>200+ simulated games</strong>.</li>
+                <li><strong>Gemini availability is a moving target.</strong> Model IDs 404 by key, region, and API
+                    version, so the app defends with a <strong>fallback chain</strong> of model names and a heuristic
+                    bidder — the AI never hard-crashes the round.</li>
+                <li><strong>Folding real HTML into a 3D scene.</strong> Keeping CSS3DRenderer panels crisp, clickable,
+                    and correctly scaled meant auto-scaling every screen to the window while it stayed a live form
+                    element rather than a flat texture.</li>
+                <li><strong>Camera feel.</strong> View switches <strong>interpolate (lerp)</strong> between targets — the
+                    big screen, your tablet, the neutral room, the auction log — instead of snapping, simulating the
+                    motion of turning your head.</li>
+            </ul>
+
+            <h2>Reflection</h2>
+            <p>
+                The most valuable lesson wasn't any single technology — it was the payoff of <strong>clean separation
+                of concerns</strong>. Because the backend broadcasts game events without caring how they're displayed,
+                I could reimagine the frontend from flat HTML into a WebGL auction room without rewriting the game.
+                That Brain / Stage / Illusionist / Messenger split is the thing I'd carry into every future project.
+            </p>
+            <p>
+                The bugs taught the rest: in a real-time app, identity has to be <strong>durable</strong> and the source
+                of truth <strong>stable</strong> — tying a seat to a socket felt fine until the first refresh proved
+                otherwise. And integrating Gemini was a lesson in <strong>designing for failure</strong>: build the
+                fallback path first, so the game stays fun whether its opponents come from a language model or a simple
+                heuristic.
+            </p>
         </div>
     </main>
 

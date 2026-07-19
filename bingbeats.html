@@ -54,75 +54,126 @@
     </div>
 
     <main class="page article">
-        <span class="kicker" data-reveal>Project 01 — Mobile · Music · Apr 2026</span>
+        <span class="kicker" data-reveal>Project 01 — Mobile · Music · AI · Apr 2026</span>
         <h1 class="display" data-reveal style="--d: 0.05s;">Bing <em>Beats.</em></h1>
         <p class="lede" data-reveal style="--d: 0.1s;">
-            Music discovery by place and time — pick a country and a year, explore tracks,
-            and chat with an assistant that suggests playlist-style results in context.
+            Discover music across time and space. Pick any country and any year from 1950 to today, and
+            Bing Beats surfaces the tracks that defined that place and moment — with 30-second previews and
+            an AI guide that knows the local scene. "What did the world sound like in Brazil in 1998?",
+            turned into a tappable, playable playlist.
         </p>
+
+        <div class="stat-strip" data-reveal style="--d: 0.16s; margin: 0.4rem 0 1rem;">
+            <div class="stat"><div class="num">1950 →</div><div class="lbl">Years to explore</div></div>
+            <div class="stat"><div class="num">30s</div><div class="lbl">Playable previews</div></div>
+            <div class="stat"><div class="num">3</div><div class="lbl">iOS · Android · web</div></div>
+        </div>
 
         <div data-reveal>
             <p>
-                <strong>Bing Beats</strong> is an Expo + React Native app. The interface is built with
-                Expo Router, and an AI assistant surfaces playlist-style suggestions tailored to the
-                country and era you're exploring. Shipped across <strong>iOS, Android, and web</strong>
-                targets against a deployed backend service.
+                Bing Beats is a cross-platform music-discovery app built with <strong>Expo / React Native</strong>.
+                The whole interface breathes — accent colours, buttons, and the globe's glow cycle through the full
+                spectrum on a ~12-second loop, so the app feels alive without any input — while the core loop stays
+                simple and tactile.
             </p>
 
-            <h2>Project Structure</h2>
+            <h2>The loop</h2>
             <ul>
-                <li><code>BingBeats/</code> — main mobile app (Expo Router)</li>
+                <li><strong>Choose a place</strong> — tap a country from a flag grid, or spin an interactive 3D globe
+                    and tap it directly.</li>
+                <li><strong>Choose a time</strong> — drag a year slider spanning 1950 → present.</li>
+                <li><strong>Discover</strong> — get a curated playlist for that country and year, each track with cover
+                    art, a 30-second preview, and a link to open the full song in Spotify.</li>
+                <li><strong>Ask the guide</strong> — a context-aware AI chatbot explains the genres, scenes, and
+                    cultural context of that place and era, and can generate a playlist on request.</li>
             </ul>
 
-            <h2>Prerequisites</h2>
+            <h2>Two halves, keys on the server</h2>
+            <p>
+                The project is split so that private API keys never touch the client. The Expo app owns the
+                experience; a lightweight Express service acts as a secure proxy and orchestrator.
+            </p>
+
+            <div class="bento" style="margin: 1.4rem 0 0.5rem;">
+                <div class="glass-card span-3" data-tilt data-reveal>
+                    <span class="card-label">Frontend</span>
+                    <h3 class="card-title">Expo · React Native</h3>
+                    <p class="card-desc">Expo Router for file-based navigation, heavily animated with Reanimated: a
+                        wordmark that assembles letter-by-letter, a popping year counter, haptics, shimmer skeleton
+                        loaders, and a single self-cleaning <code>expo-av</code> audio player. Shared React Context
+                        holds the selected country/year and drives the app-wide cycling gradient.</p>
+                </div>
+                <div class="glass-card span-3" data-tilt data-reveal style="--d: 0.06s;">
+                    <span class="card-label">Backend</span>
+                    <h3 class="card-title">Node · Express (Render)</h3>
+                    <p class="card-desc">A secure proxy that authenticates, ranks, and enriches — so the app bundle
+                        ships with no secrets. It fuses Spotify, iTunes, Gemini, and Mapbox behind four small
+                        endpoints.</p>
+                </div>
+            </div>
+
             <ul>
-                <li>Node.js 18+</li>
-                <li>npm</li>
-                <li>Expo Go app (optional, for running on a device)</li>
+                <li><code>POST /api/playlist</code> — authenticates with <strong>Spotify</strong> (Client Credentials,
+                    token cached), searches that country's market for the year, dedupes and ranks, returns the top
+                    tracks.</li>
+                <li><code>POST /api/chat</code> — builds a country/year-scoped prompt, enriches it with the real track
+                    list, and calls <strong>Google Gemini</strong>.</li>
+                <li><code>GET /api/public-config</code> — hands the client a public <strong>Mapbox</strong> token for
+                    the globe.</li>
+                <li><code>GET /health</code> — reports which integrations are configured.</li>
             </ul>
 
-            <h2>Setup</h2>
-            <ol>
-                <li>
-                    Install dependencies:
-                    <div class="code-block">cd BingBeats
-npm install</div>
-                </li>
-                <li>
-                    Configure environment variables in <code>BingBeats/.env</code>:
-                    <div class="code-block">EXPO_PUBLIC_API_URL=https://bing-beats.onrender.com</div>
-                    <p>Use your deployed backend URL. If you run the backend locally, set the correct reachable
-                        host for your device or simulator.</p>
-                </li>
-            </ol>
+            <div class="code-block" data-reveal style="white-space: pre;"><span class="cm">// keys stay on the server, never in the app bundle</span>
+ Expo / React Native app          Express API  (Render)
+ ────────────────────────         ─────────────────────
+ • Home — flag grid / globe   ┐    /api/playlist        → Spotify + iTunes
+ • Year slider  1950 → now    │──► /api/chat            → Google Gemini
+ • Playlist + 30s previews    │◄── /api/public-config   → Mapbox
+ • AI chat assistant          ┘    /health              → integration status</div>
 
-            <h2>Run the App</h2>
-            <p>From <code>BingBeats/</code>:</p>
+            <h2>Tech stack</h2>
             <ul>
-                <li><strong>Start Expo:</strong>
-                    <div class="code-block">npm run start</div>
-                </li>
-                <li><strong>iOS simulator:</strong>
-                    <div class="code-block">npm run ios</div>
-                </li>
-                <li><strong>Android emulator:</strong>
-                    <div class="code-block">npm run android</div>
-                </li>
-                <li><strong>Web:</strong>
-                    <div class="code-block">npm run web</div>
-                </li>
+                <li><strong>Framework</strong> — Expo, React Native, Expo Router, TypeScript.</li>
+                <li><strong>UI / animation</strong> — React Native Reanimated, Expo Linear Gradient, Expo Haptics, and
+                    a custom cycling-gradient theming layer.</li>
+                <li><strong>Audio</strong> — <code>expo-av</code> for 30-second preview playback.</li>
+                <li><strong>Maps</strong> — Mapbox GL, rendering the interactive globe inside a WebView.</li>
+                <li><strong>Backend</strong> — Node.js, Express, CORS.</li>
+                <li><strong>Music data</strong> — Spotify Web API, backfilled by the iTunes Search API for previews.</li>
+                <li><strong>AI</strong> — Google Gemini (<code>gemini-2.5-flash-lite</code>).</li>
+                <li><strong>Hosting</strong> — Render for the backend; Expo Go as the app runtime.</li>
             </ul>
 
-            <p>If you change <code>.env</code>, restart Expo (prefer <code>npx expo start --clear</code>).</p>
-
-            <h2>Available Scripts</h2>
-            <p>Inside <code>BingBeats/</code>:</p>
+            <h2>Engineering challenges</h2>
             <ul>
-                <li><code>npm run start</code> — starts the Expo dev server</li>
-                <li><code>npm run ios</code> — opens the iOS target</li>
-                <li><code>npm run android</code> — opens the Android target</li>
-                <li><code>npm run web</code> — runs the web target</li>
-                <li><code>npm run lint</code> — runs Expo lint</li>
+                <li><strong>Spotify hides its preview URLs.</strong> The Web API often returns a null
+                    <code>preview_url</code>, which would leave the play button useless. For every selected track the
+                    backend does a secondary <strong>iTunes</strong> lookup and backfills a real 30-second clip — sharply
+                    increasing the number of actually-playable tracks.</li>
+                <li><strong>An undocumented rate limit.</strong> Spotify's docs claim search limits up to 50, but the
+                    live API rejects anything above 10 with <code>400 Invalid limit</code>. Only real testing surfaced
+                    it; search now pages with <code>limit=10</code> and gathers candidates across requests.</li>
+                <li><strong>Render's cold starts.</strong> The free tier spins down when idle, adding a 30–60s delay on
+                    the first request. That drove honest loading states — shimmer skeletons and progress messaging — so
+                    the wait feels intentional rather than frozen.</li>
+                <li><strong>A 3D globe inside React Native.</strong> With no native globe component, Mapbox runs in a
+                    WebView. Feeding it the cycling accent colour naively would flood the bridge, so the hue is
+                    <strong>quantized into buckets</strong> — the globe updates ~24 times per colour loop instead of
+                    hundreds of times a second.</li>
+                <li><strong>Gemini quota &amp; fallback.</strong> Free-tier models hit <code>429</code> under load, so
+                    the server defaults to a higher-headroom model and exposes an env override — the model can be
+                    swapped without a code change when a quota is exhausted.</li>
+                <li><strong>Keeping the chatbot useful.</strong> Playlist requests are detected by intent and
+                    short-circuited to return a real, tappable playlist rather than a generic text list — bridging the
+                    gap between "chatbot" and "functional feature."</li>
+            </ul>
+
+            <h2>What's next</h2>
+            <ul>
+                <li>A real <strong>database</strong> to persist saved playlists and preferences (currently in-memory).</li>
+                <li><strong>Conversation memory</strong> and stronger topic-guarding, so the AI guide stays focused
+                    across a longer chat.</li>
+                <li>Richer loading states to further mask cold-start latency.</li>
             </ul>
         </div>
     </main>
