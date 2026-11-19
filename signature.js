@@ -1,35 +1,41 @@
 /* ============================================================
    KAIWEN LI — SIGNATURE LAYER
-   The site does mathematics:
-   · Conway's Game of Life living in the background grid,
-     seeded by your cursor, gliders on click
-   · A true 4D tesseract (rotations in the XW/YZ/XY/ZW planes,
-     projected 4D→3D→2D) steering with the cursor
-   · A working terminal:  `  to open — prove, prime, collatz,
-     fib, life, glider, spin, open …
+   Conway's Game of Life as a pond: spaceships swim across the
+   page like koi, the cursor sows cells, clicks launch gliders.
+   Two species share the water ("Immigration" Life): a newborn cell
+   takes the majority colour of its three parents, so every ship
+   keeps one colour as it swims — a few orange koi among cobalt.
+   Cells cross-fade and stay faint: the pond is a backdrop, never
+   something that blinks at you.
    Zero libraries. Everything below is hand-rolled.
    ============================================================ */
 
 (function () {
     "use strict";
 
-    /* theme + shared motion state (owned by site.js; light "paper" is default) */
-    const isLight = () => document.documentElement.getAttribute("data-theme") !== "dark";
-    const motion = window.__klMotion || { energy: 0, hue: 210 };
+    const root = document.documentElement;
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
 
-    /* ---------- shared cursor (own lerp, independent of site.js) ---------- */
-    const cur = { x: innerWidth / 2, y: innerHeight / 2, nx: 0, ny: 0, tx: 0, ty: 0, active: false };
-    addEventListener("pointermove", (e) => {
-        cur.x = e.clientX;
-        cur.y = e.clientY;
-        cur.tx = e.clientX / innerWidth - 0.5;
-        cur.ty = e.clientY / innerHeight - 0.5;
-        cur.active = true;
-    }, { passive: true });
+    /* ---------- palette: read from CSS tokens, refreshed on theme change ---------- */
+    const pal = { koi: "#d9542f", cobalt: "#2b45a6", trail: "#c9cde3", ink: 0.32 };
+
+    function readPalette() {
+        const cs = getComputedStyle(root);
+        const tok = (name, fallback) => cs.getPropertyValue(name).trim() || fallback;
+        pal.koi = tok("--accent", pal.koi);
+        pal.cobalt = tok("--blue", pal.cobalt);
+        pal.trail = tok("--trail", pal.trail);
+        // peak opacity of a fully lit cell — kept low so the pond never competes with text
+        const ink = parseFloat(tok("--pond-ink", ""));
+        if (ink > 0 && ink <= 1) pal.ink = ink;
+    }
+    readPalette();
+    new MutationObserver(readPalette).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
 
     /* ---------- toast ---------- */
     const toastEl = document.createElement("div");
     toastEl.className = "kl-toast";
+    toastEl.setAttribute("role", "status");
     document.body.appendChild(toastEl);
     let toastTimer;
     function toast(msg) {
@@ -40,60 +46,48 @@
     }
 
     /* ============================================================
-       CONWAY'S GAME OF LIFE — B3/S23 on a torus
+       CONWAY'S GAME OF LIFE — B3/S23 on a torus. The grid is wider
+       than the screen by M cells on every side, so ships can be
+       launched out of sight and swim in.
        ============================================================ */
-    const ambient = document.querySelector(".ambient");
+    const CS = 22;            // cell size, px
+    const M = 8;              // hidden margin, cells
+    const TICK = 260;         // ms per generation — a slow drift, not a flicker
+    const SPAWN_EVERY = 3200; // ms between population checks
+    const BASE = 0.28;        // pond strength away from the hero (behind reading text)
+    const ERODE_AGE = 100;    // still lifes older than this slowly dissolve
+    const GLOW_TAU = 220;     // ms — cells fade in and out instead of popping
+    const TRAIL_TAU = 520;    // ms — the pale wake left by a cell that just died
+    const TRAIL_A = 0.4;      // wake opacity (its colour is already close to the paper)
+    const KOI = 0.3;          // share of new ships (and soup) that are orange
+
     const life = {
-        on: true, CS: 26, TICK: 150,
-        cols: 0, rows: 0, cells: null, next: null, energy: null, age: null,
-        ctx: null, lastTick: 0,
+        cols: 0, rows: 0, visCols: 0, visRows: 0, w: 0, h: 0,
+        cells: null, next: null, age: null, glow: null, trail: null, kind: null,
+        ctx: null, lastTick: 0, lastSpawn: 0, gen: 0, alive: 0, seen: 0,
     };
 
-    if (ambient) {
-        const cv = document.createElement("canvas");
-        cv.className = "life-canvas";
-        // slot beneath the constellation canvas if site.js already added one
-        const netCv = ambient.querySelector("canvas");
-        if (netCv) ambient.insertBefore(cv, netCv);
-        else ambient.appendChild(cv);
-        life.ctx = cv.getContext("2d");
+    const ambient = document.querySelector(".ambient");
+    const hero = document.querySelector(".hero");
+    const genEl = document.querySelector(".life-gen");
+    const aliveEl = document.querySelector(".life-alive");
 
-        const build = () => {
-            const dpr = Math.min(devicePixelRatio || 1, 2);
-            cv.width = innerWidth * dpr;
-            cv.height = innerHeight * dpr;
-            life.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            life.cols = Math.ceil(innerWidth / life.CS);
-            life.rows = Math.ceil(innerHeight / life.CS);
-            const n = life.cols * life.rows;
-            life.cells = new Uint8Array(n);
-            life.next = new Uint8Array(n);
-            life.energy = new Float32Array(n);
-            life.age = new Uint16Array(n);
-            soup(0.05);
-        };
-        build();
-        let rt;
-        addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(build, 200); });
-    }
+    // spaceships as drawn swim LEFT at c/2; mirrored copies swim right
+    const LWSS = [".O..O", "O....", "O...O", "OOOO."];
+    const MWSS = ["...O..", ".O...O", "O.....", "O....O", "OOOOO."];
+    const toCells = (rows, mirror) => {
+        const out = [];
+        rows.forEach((row, r) => {
+            for (let c = 0; c < row.length; c++) {
+                if (row[c] === "O") out.push([r, mirror ? row.length - 1 - c : c]);
+            }
+        });
+        return out;
+    };
+    // even index swims left, odd index swims right
+    const SHIPS = [toCells(LWSS, false), toCells(LWSS, true), toCells(MWSS, false), toCells(MWSS, true)];
 
-    function soup(density) {
-        if (!life.cells) return;
-        for (let i = 0; i < life.cells.length; i++) {
-            if (Math.random() < density) { life.cells[i] = 1; life.age[i] = 0; }
-        }
-    }
-
-    function setCell(col, row, v) {
-        if (!life.cells) return;
-        const c = ((col % life.cols) + life.cols) % life.cols;
-        const r = ((row % life.rows) + life.rows) % life.rows;
-        const i = r * life.cols + c;
-        life.cells[i] = v;
-        if (v) life.age[i] = 0;
-    }
-
-    // the four rotations/reflections of the glider
+    // the four rotations/reflections of the glider, as [row, col]
     const GLIDERS = [
         [[0, 1], [1, 2], [2, 0], [2, 1], [2, 2]],
         [[0, 0], [0, 1], [1, 1], [1, 2], [2, 0]],
@@ -101,16 +95,87 @@
         [[0, 2], [1, 0], [1, 1], [2, 1], [2, 2]],
     ];
 
-    function stampGlider(px, py) {
-        const col = Math.floor(px / life.CS), row = Math.floor(py / life.CS);
+    // the canvas fills .ambient, i.e. the viewport *minus* any classic scrollbar
+    const viewW = () => (ambient && ambient.clientWidth) || document.documentElement.clientWidth || innerWidth;
+    const viewH = () => (ambient && ambient.clientHeight) || document.documentElement.clientHeight || innerHeight;
+
+    function allocate() {
+        const w = viewW(), h = viewH();
+        const visCols = Math.ceil(w / CS), visRows = Math.ceil(h / CS);
+        const cols = visCols + 2 * M, rows = visRows + 2 * M;
+        const n = cols * rows;
+        const cells = new Uint8Array(n), next = new Uint8Array(n);
+        const age = new Uint16Array(n), glow = new Float32Array(n), trail = new Float32Array(n);
+        const kind = new Uint8Array(n);   // 0 = cobalt, 1 = orange
+        // carry the pond across resizes — mobile URL bars resize the viewport constantly
+        if (life.cells) {
+            const cMax = Math.min(cols, life.cols), rMax = Math.min(rows, life.rows);
+            for (let r = 0; r < rMax; r++) {
+                for (let c = 0; c < cMax; c++) {
+                    const o = r * life.cols + c, i = r * cols + c;
+                    cells[i] = life.cells[o];
+                    age[i] = life.age[o];
+                    glow[i] = life.glow[o];
+                    trail[i] = life.trail[o];
+                    kind[i] = life.kind[o];
+                }
+            }
+        }
+        Object.assign(life, { cols, rows, visCols, visRows, w, h, cells, next, age, glow, trail, kind });
+    }
+
+    function setCell(col, row, v, k) {
+        if (!life.cells) return;
+        const c = ((col % life.cols) + life.cols) % life.cols;
+        const r = ((row % life.rows) + life.rows) % life.rows;
+        const i = r * life.cols + c;
+        life.cells[i] = v;
+        life.age[i] = 0;
+        if (v && k !== undefined) life.kind[i] = k;
+    }
+
+    function soup(density) {
+        if (!life.cells) return;
+        for (let i = 0; i < life.cells.length; i++) {
+            if (Math.random() < density) {
+                life.cells[i] = 1;
+                life.age[i] = 0;
+                life.kind[i] = Math.random() < KOI ? 1 : 0;
+            }
+        }
+    }
+
+    function stampGlider(px, py, k = 1) {
+        const col = Math.floor(px / CS) + M, row = Math.floor(py / CS) + M;
         const g = GLIDERS[(Math.random() * GLIDERS.length) | 0];
-        for (const [dr, dc] of g) setCell(col + dc, row + dr, 1);
+        for (const [dr, dc] of g) setCell(col + dc, row + dr, 1, k);
+    }
+
+    // onScreen: drop it somewhere visible; otherwise launch it from the hidden margin
+    function spawnShip(onScreen) {
+        if (!life.cells) return;
+        const k = (Math.random() * SHIPS.length) | 0;
+        const right = k % 2 === 1;
+        const row = M + 1 + ((Math.random() * Math.max(1, life.visRows - 7)) | 0);
+        const col = onScreen
+            ? M + ((Math.random() * Math.max(1, life.visCols - 6)) | 0)
+            : (right ? M - 7 : M + life.visCols + 1);
+        const species = Math.random() < KOI ? 1 : 0;
+        for (const [dr, dc] of SHIPS[k]) setCell(col + dc, row + dr, 1, species);
+    }
+
+    function seed() {
+        for (let k = 0; k < 6; k++) spawnShip(true);
+        for (let k = 0; k < 3; k++) stampGlider(Math.random() * life.w, Math.random() * life.h, Math.random() < KOI ? 1 : 0);
+        soup(0.012);
     }
 
     function lifeTick() {
-        const { cols, rows, cells, next, age } = life;
-        let alive = 0;
+        const { cols, rows, cells, next, age, trail, kind } = life;
+        const r0 = M, r1 = M + life.visRows, c0 = M, c1 = M + life.visCols;
+        let alive = 0, seen = 0;  // whole torus vs. the visible window only
         for (let r = 0; r < rows; r++) {
+            const rowVisible = r >= r0 && r < r1;
             const up = ((r - 1 + rows) % rows) * cols;
             const mid = r * cols;
             const dn = ((r + 1) % rows) * cols;
@@ -121,674 +186,245 @@
                     cells[mid + l] + cells[mid + rr] +
                     cells[dn + l] + cells[dn + c] + cells[dn + rr];
                 const i = mid + c;
-                next[i] = cells[i] ? (n === 2 || n === 3 ? 1 : 0) : (n === 3 ? 1 : 0);
-                if (next[i]) { alive++; age[i] = Math.min(age[i] + 1, 600); }
+                const was = cells[i];
+                let now = was ? (n === 2 || n === 3 ? 1 : 0) : (n === 3 ? 1 : 0);
+                // still lifes slowly dissolve so the pond never silts up
+                if (now && was && age[i] > ERODE_AGE && Math.random() < 0.03) now = 0;
+                next[i] = now;
+                if (now) {
+                    alive++;
+                    if (rowVisible && c >= c0 && c < c1) seen++;
+                    if (was) age[i] = Math.min(age[i] + 1, 1000);
+                    else {
+                        // a birth has exactly three live parents: take their majority colour.
+                        // Safe to write in place — a dead cell's own colour is never read as a parent.
+                        age[i] = 0;
+                        kind[i] = (
+                            cells[up + l] * kind[up + l] + cells[up + c] * kind[up + c] + cells[up + rr] * kind[up + rr] +
+                            cells[mid + l] * kind[mid + l] + cells[mid + rr] * kind[mid + rr] +
+                            cells[dn + l] * kind[dn + l] + cells[dn + c] * kind[dn + c] + cells[dn + rr] * kind[dn + rr]
+                        ) >= 2 ? 1 : 0;
+                    }
+                } else if (was) {
+                    trail[i] = 1;
+                    age[i] = 0;
+                }
             }
         }
-        life.cells.set(next);
-        const total = cols * rows;
-        // keep the colony sparse and immortal
-        if (alive > total * 0.16) {
-            for (let i = 0; i < total; i++) {
-                if (life.cells[i] && Math.random() < 0.35) life.cells[i] = 0;
+        cells.set(next);
+        // hard ceiling, in case a collision explodes
+        if (alive > cells.length * 0.14) {
+            alive = 0;
+            seen = 0;
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const i = r * cols + c;
+                    if (cells[i] && Math.random() < 0.35) { cells[i] = 0; trail[i] = 1; age[i] = 0; }
+                    alive += cells[i];
+                    if (cells[i] && r >= r0 && r < r1 && c >= c0 && c < c1) seen++;
+                }
             }
-        } else if (alive < total * 0.004) {
-            soup(0.04);
         }
+        life.alive = alive;
+        life.seen = seen;
+        life.gen++;
     }
 
-    function lifeRender() {
+    function updateStats() {
+        if (genEl) genEl.textContent = String(life.gen).padStart(4, "0");
+        if (aliveEl) aliveEl.textContent = String(life.seen).padStart(3, "0");
+    }
+
+    // re-run `cb` whenever devicePixelRatio changes (window dragged to another screen, zoom)
+    function onDprChange(cb) {
+        if (!window.matchMedia) return;
+        let mq = null;
+        const listen = () => {
+            mq = window.matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`);
+            if (mq.addEventListener) mq.addEventListener("change", fire, { once: true });
+            else if (mq.addListener) mq.addListener(fire);
+        };
+        function fire() {
+            if (mq && !mq.addEventListener && mq.removeListener) mq.removeListener(fire);
+            cb();
+            listen();
+        }
+        listen();
+    }
+
+    /* ---------- hero: cells are vivid up top, fade behind reading text ---------- */
+    const keepEls = hero ? Array.from(hero.querySelectorAll("[data-keepout]")) : [];
+    const navEl = document.querySelector(".site-nav");
+    let keeps = [];   // [x0, y0, x1, y1] in document coordinates, padded
+    let heroH = 0;
+    let navBottom = 0; // the fixed nav is transparent over the hero — keep its band clear too
+    let strength = BASE;
+
+    function measureKeepouts() {
+        if (!hero) return;
+        heroH = hero.offsetHeight || innerHeight;
+        navBottom = navEl ? navEl.getBoundingClientRect().bottom : 0;
+        const sy = scrollY, pad = 14;
+        keeps = keepEls.map((el) => {
+            const r = el.getBoundingClientRect();
+            return [r.left - pad, r.top + sy - pad, r.right + pad, r.bottom + sy + pad];
+        });
+    }
+
+    function heroStrength() {
+        if (!hero) return BASE;
+        const t = Math.min(1, Math.max(0, scrollY / Math.max(1, heroH * 0.75)));
+        return 1 - t * (1 - BASE);
+    }
+
+    // 1 in open water; KEEP_MIN behind text and the nav band, ramping over FEATHER px
+    // so ships slide under the text softly instead of switching off at a hard edge
+    const KEEP_MIN = 0.05, FEATHER = 44;
+    const ramp = (d) => d <= 0 ? KEEP_MIN : d >= FEATHER ? 1 : KEEP_MIN + (1 - KEEP_MIN) * (d / FEATHER);
+    function keepFactor(x, viewY, docY) {
+        let f = ramp(viewY - navBottom);
+        for (let k = 0; k < keeps.length && f > KEEP_MIN; k++) {
+            const b = keeps[k];
+            const dx = Math.max(b[0] - x, 0, x - b[2]);
+            const dy = Math.max(b[1] - docY, 0, docY - b[3]);
+            if (dx < FEATHER && dy < FEATHER) f = Math.min(f, ramp(Math.hypot(dx, dy)));
+        }
+        return f;
+    }
+
+    let lastRender = 0;
+    function lifeRender(ts) {
         const ctx = life.ctx;
-        if (!ctx) return;
-        ctx.clearRect(0, 0, innerWidth, innerHeight);
-        if (!life.on) return;
-        const { cols, rows, cells, energy, age, CS } = life;
-        const pad = CS * 0.14, sz = CS - pad * 2;
-        for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-                const i = r * cols + c;
-                const target = cells[i] ? 1 : 0;
-                energy[i] += (target - energy[i]) * 0.14;
-                const e = energy[i];
-                if (e < 0.02) continue;
-                // young cells cyan → mature cells indigo
-                // young cells bloom into colour where the cursor sows them,
-                // then settle into mono ink as they age
-                const t = Math.min(age[i] / 40, 1);
-                const sat = Math.round((1 - t) * motion.energy * 88);
-                const light = isLight() ? (46 - t * 27) : (90 - t * 20);
-                const hue = (motion.hue + i * 0.7) % 360;
-                ctx.fillStyle = `hsla(${hue}, ${sat}%, ${light}%, ${e * (isLight() ? 0.17 : 0.12)})`;
-                ctx.fillRect(c * CS + pad, r * CS + pad, sz, sz);
+        const { cols, visCols, visRows, cells, glow, trail, kind } = life;
+        const s = strength * pal.ink;
+        const pad = 1.5, sz = CS - pad * 2, half = CS / 2;
+        const sy = scrollY;
+        const useKeep = keeps.length > 0 && strength > BASE + 0.02;
+
+        // time-based easing, so 60 Hz and 120 Hz screens look the same
+        const dt = Math.min(100, lastRender ? ts - lastRender : 16);
+        lastRender = ts;
+        const kGlow = 1 - Math.exp(-dt / GLOW_TAU);
+        const kTrail = Math.exp(-dt / TRAIL_TAU);
+
+        ctx.clearRect(0, 0, life.w, life.h);
+
+        // ease every cell (hidden margin included) toward its state
+        for (let i = 0; i < cells.length; i++) {
+            glow[i] += (cells[i] - glow[i]) * kGlow;
+            if (glow[i] < 0.004) glow[i] = 0;
+            if (trail[i] > 0) trail[i] = trail[i] < 0.02 ? 0 : trail[i] * kTrail;
+        }
+
+        // three passes — wake, cobalt, orange — so fillStyle changes only three times.
+        // A dying cell keeps drawing while its glow fades, so nothing ever pops off.
+        for (let pass = 0; pass < 3; pass++) {
+            ctx.fillStyle = pass === 0 ? pal.trail : pass === 1 ? pal.cobalt : pal.koi;
+            for (let r = M; r < M + visRows; r++) {
+                const y = (r - M) * CS;
+                for (let c = M; c < M + visCols; c++) {
+                    const i = r * cols + c;
+                    let a;
+                    if (pass === 0) {
+                        if (trail[i] === 0) continue;
+                        a = trail[i] * (1 - glow[i]) * TRAIL_A * strength;
+                    } else {
+                        if (glow[i] === 0 || kind[i] !== pass - 1) continue;
+                        a = glow[i] * s;
+                    }
+                    if (a < 0.006) continue;
+                    const x = (c - M) * CS;
+                    if (useKeep) a *= keepFactor(x + half, y + half, y + half + sy);
+                    if (a < 0.006) continue;
+                    ctx.globalAlpha = a;
+                    ctx.fillRect(x + pad, y + pad, sz, sz);
+                }
             }
         }
+        ctx.globalAlpha = 1;
     }
 
-    // the cursor sows life as it travels
-    let seedX = -999, seedY = -999;
-    addEventListener("pointermove", (e) => {
-        if (!life.cells || !life.on) return;
-        if (Math.hypot(e.clientX - seedX, e.clientY - seedY) > life.CS) {
-            seedX = e.clientX;
-            seedY = e.clientY;
-            const col = Math.floor(e.clientX / life.CS), row = Math.floor(e.clientY / life.CS);
-            setCell(col, row, 1);
-            setCell(col + ((Math.random() * 3) | 0) - 1, row + ((Math.random() * 3) | 0) - 1, 1);
-        }
-    }, { passive: true });
-
-    // clicks launch gliders (except on interactive elements)
-    addEventListener("pointerdown", (e) => {
-        if (e.target.closest("a, button, input, .terminal, .site-nav, .overlay-menu")) return;
-        if (life.on) stampGlider(e.clientX, e.clientY);
-    }, { passive: true });
-
-    /* ============================================================
-       TESSERACT — {-1,1}^4 rotated in 4 planes, projected twice
-       ============================================================ */
-    const hero = document.querySelector(".hero");
-    let tctx = null, tW = 0, tH = 0, spinBoost = 0;
-    const ang = { xw: 0.4, yz: 0.2, xy: 0, zw: 0 };
-
-    const VERTS = [];
-    for (let i = 0; i < 16; i++) {
-        VERTS.push([
-            (i & 1) * 2 - 1,
-            ((i >> 1) & 1) * 2 - 1,
-            ((i >> 2) & 1) * 2 - 1,
-            ((i >> 3) & 1) * 2 - 1,
-        ]);
-    }
-    const EDGES = [];
-    for (let i = 0; i < 16; i++) {
-        for (let j = i + 1; j < 16; j++) {
-            const x = i ^ j;
-            if ((x & (x - 1)) === 0) EDGES.push([i, j]); // differ in exactly one coordinate
-        }
-    }
-
-    if (hero) {
+    if (ambient) {
         const cv = document.createElement("canvas");
-        cv.id = "tesseract";
-        hero.insertBefore(cv, hero.firstChild);
-        tctx = cv.getContext("2d");
+        cv.className = "life-canvas";
+        cv.setAttribute("aria-hidden", "true");
+        ambient.appendChild(cv);
+        life.ctx = cv.getContext("2d");
+    }
+
+    if (life.ctx) {
+        const cv = life.ctx.canvas;
         const fit = () => {
             const dpr = Math.min(devicePixelRatio || 1, 2);
-            tW = hero.clientWidth;
-            tH = hero.clientHeight;
-            cv.width = tW * dpr;
-            cv.height = tH * dpr;
-            tctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            const first = !life.cells;
+            allocate();
+            cv.width = Math.round(life.w * dpr);
+            cv.height = Math.round(life.h * dpr);
+            life.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            if (first) seed();
+            measureKeepouts();
         };
         fit();
-        addEventListener("resize", fit);
-    }
+        let rt;
+        const refit = () => { clearTimeout(rt); rt = setTimeout(fit, 150); };
+        addEventListener("resize", refit);
+        // a classic scrollbar appearing/disappearing resizes .ambient without a window resize
+        if ("ResizeObserver" in window) new ResizeObserver(refit).observe(ambient);
+        onDprChange(fit);
+        // fonts and the hero's entrance animation both move the text boxes
+        addEventListener("load", measureKeepouts);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureKeepouts);
 
-    function drawTesseract() {
-        if (!tctx) return;
-        const boost = 1 + spinBoost;
-        spinBoost *= 0.985;
-        // cursor position drives the two main rotation planes
-        ang.xw += (0.0036 + cur.nx * 0.016) * boost;
-        ang.yz += (0.0042 + cur.ny * 0.016) * boost;
-        ang.xy += 0.0021 * boost;
-        ang.zw += 0.0015 * boost;
-
-        const cxw = Math.cos(ang.xw), sxw = Math.sin(ang.xw);
-        const cyz = Math.cos(ang.yz), syz = Math.sin(ang.yz);
-        const cxy = Math.cos(ang.xy), sxy = Math.sin(ang.xy);
-        const czw = Math.cos(ang.zw), szw = Math.sin(ang.zw);
-
-        const cx = tW / 2 + cur.nx * -30;
-        const cy = tH / 2 + cur.ny * -22;
-        const R = Math.min(tW, tH) * 0.19;
-        const DW = 3, DZ = 4; // projection distances
-
-        const proj = [];
-        for (const [x0, y0, z0, w0] of VERTS) {
-            // rotate in XW
-            let x = x0 * cxw - w0 * sxw;
-            let w = x0 * sxw + w0 * cxw;
-            // rotate in YZ
-            let y = y0 * cyz - z0 * syz;
-            let z = y0 * syz + z0 * cyz;
-            // rotate in XY
-            const x2 = x * cxy - y * sxy;
-            const y2 = x * sxy + y * cxy;
-            x = x2; y = y2;
-            // rotate in ZW
-            const z2 = z * czw - w * szw;
-            const w2 = z * szw + w * czw;
-            z = z2; w = w2;
-            // 4D → 3D (w-perspective), then 3D → 2D (z-perspective)
-            const s4 = DW / (DW - w);
-            const x3 = x * s4, y3 = y * s4, z3 = z * s4;
-            const s3 = DZ / (DZ - z3);
-            proj.push({
-                x: cx + x3 * s3 * R,
-                y: cy + y3 * s3 * R,
-                d: s4 * s3, // combined depth cue
-            });
-        }
-
-        tctx.clearRect(0, 0, tW, tH);
-        for (const [a, b] of EDGES) {
-            const p = proj[a], q = proj[b];
-            const d = (p.d + q.d) / 2;
-            const t = Math.max(0, Math.min(1, (d - 0.7) / 1.1));
-            // depth drives lightness/thickness; motion drives colour
-            const act = Math.min(1, motion.energy * 0.9 + spinBoost * 0.5);
-            const hue = (motion.hue + t * 40) % 360;
-            const el = isLight() ? (30 - t * 10) : (55 + t * 35);
-            const al = (0.10 + t * 0.24) * (isLight() ? 1.5 : 1);
-            tctx.beginPath();
-            tctx.moveTo(p.x, p.y);
-            tctx.lineTo(q.x, q.y);
-            tctx.strokeStyle = `hsla(${hue}, ${Math.round(act * 85)}%, ${el}%, ${al})`;
-            tctx.lineWidth = 0.7 + t * 1.1;
-            tctx.stroke();
-        }
-        for (const p of proj) {
-            const t = Math.max(0, Math.min(1, (p.d - 0.7) / 1.1));
-            const act = Math.min(1, motion.energy * 0.9 + spinBoost * 0.5);
-            const hue = (motion.hue + t * 40) % 360;
-            const el = isLight() ? (22 - t * 6) : (78 + t * 18);
-            tctx.beginPath();
-            tctx.arc(p.x, p.y, 1.4 + t * 1.8, 0, Math.PI * 2);
-            tctx.fillStyle = `hsla(${hue}, ${Math.round(act * 80)}%, ${el}%, ${0.28 + t * 0.5})`;
-            tctx.fill();
-        }
-    }
-
-    /* ============================================================
-       GLOBE — a rotating Fibonacci sphere of points (terminal: globe)
-       ============================================================ */
-    const globe = { on: false, cv: null, ctx: null, W: 0, H: 0, pts: [], rot: 0, fade: 0 };
-
-    // distribute unit-sphere points along the golden spiral
-    (function buildGlobe() {
-        const N = 2000;
-        const golden = Math.PI * (3 - Math.sqrt(5));
-        for (let i = 0; i < N; i++) {
-            const y = 1 - (i / (N - 1)) * 2;
-            const r = Math.sqrt(Math.max(0, 1 - y * y));
-            const th = i * golden;
-            globe.pts.push([Math.cos(th) * r, y, Math.sin(th) * r]);
-        }
-    })();
-
-    function ensureGlobe() {
-        if (globe.cv) return;
-        const cv = document.createElement("canvas");
-        cv.className = "globe-canvas";
-        document.body.appendChild(cv);
-        globe.cv = cv;
-        globe.ctx = cv.getContext("2d");
-        const fit = () => {
-            const dpr = Math.min(devicePixelRatio || 1, 2);
-            globe.W = innerWidth; globe.H = innerHeight;
-            cv.width = globe.W * dpr;
-            cv.height = globe.H * dpr;
-            globe.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        };
-        fit();
-        addEventListener("resize", fit);
-    }
-
-    function drawGlobe() {
-        const ctx = globe.ctx;
-        if (!ctx) return;
-        const target = globe.on ? 1 : 0;
-        globe.fade += (target - globe.fade) * 0.07;
-        if (!globe.on && globe.fade < 0.004) {
-            ctx.clearRect(0, 0, globe.W, globe.H);
-            globe.cv.style.opacity = "0";
-            return;
-        }
-        globe.cv.style.opacity = "1";
-        ctx.clearRect(0, 0, globe.W, globe.H);
-
-        const cx = globe.W / 2, cy = globe.H / 2;
-        const R = Math.min(globe.W, globe.H) * 0.36 * (0.55 + 0.45 * globe.fade);
-        const light = isLight();
-
-        // faint halo lifts the sphere off the page
-        const g = ctx.createRadialGradient(cx, cy, R * 0.15, cx, cy, R * 1.25);
-        g.addColorStop(0, `rgba(${light ? "20, 18, 12" : "255, 255, 255"}, ${0.05 * globe.fade})`);
-        g.addColorStop(1, "transparent");
-        ctx.fillStyle = g;
-        ctx.fillRect(cx - R * 1.3, cy - R * 1.3, R * 2.6, R * 2.6);
-
-        // spin from its own idle drift + a launch burst + cursor energy; tilt follows cursor
-        globe.rot += 0.004 + motion.energy * 0.02 + spinBoost * 0.004;
-        const tilt = 0.45 + cur.ny * 0.5;
-        const ca = Math.cos(globe.rot), sa = Math.sin(globe.rot);
-        const ct = Math.cos(tilt), st = Math.sin(tilt);
-        const sat = Math.round(motion.energy * 88);
-
-        for (const [x0, y0, z0] of globe.pts) {
-            const x = x0 * ca + z0 * sa;         // rotate around Y
-            let z = -x0 * sa + z0 * ca;
-            const y = y0 * ct - z * st;          // tilt around X
-            z = y0 * st + z * ct;
-            const depth = (z + 1) / 2;           // 0 back → 1 front
-            const size = (0.55 + depth * 1.7) * (0.7 + 0.3 * globe.fade);
-            const a = (0.1 + depth * 0.62) * globe.fade;
-            const l = light ? (32 - depth * 20) : (52 + depth * 43);
-            ctx.beginPath();
-            ctx.arc(cx + x * R, cy + y * R, size, 0, Math.PI * 2);
-            ctx.fillStyle = `hsla(${(motion.hue + depth * 30) % 360}, ${sat}%, ${l}%, ${a})`;
-            ctx.fill();
-        }
-    }
-
-    /* ============================================================
-       TERMINAL
-       ============================================================ */
-    const launcher = document.createElement("button");
-    launcher.className = "term-launcher";
-    launcher.innerHTML = '<span class="tl-dot"></span>~ terminal <kbd>`</kbd>';
-    document.body.appendChild(launcher);
-
-    const term = document.createElement("div");
-    term.className = "terminal";
-    term.innerHTML =
-        '<div class="term-bar">' +
-        '<span class="term-dots"><i></i><i></i><i></i></span>' +
-        '<span class="term-title">kaiwen@cmu — portfolio-shell</span>' +
-        '<button class="term-close" aria-label="Close terminal">✕</button>' +
-        '</div>' +
-        '<div class="term-out"></div>' +
-        '<div class="term-line"><span class="term-prompt">❯</span>' +
-        '<input class="term-in" spellcheck="false" autocomplete="off" autocapitalize="off"></div>';
-    document.body.appendChild(term);
-
-    const out = term.querySelector(".term-out");
-    const input = term.querySelector(".term-in");
-    let booted = false;
-    const history = [];
-    let histIdx = -1;
-
-    function print(text, cls) {
-        const div = document.createElement("div");
-        div.className = "tline" + (cls ? " " + cls : "");
-        div.textContent = text;
-        out.appendChild(div);
-        out.scrollTop = out.scrollHeight;
-    }
-
-    function printCmd(text) {
-        const div = document.createElement("div");
-        div.className = "tline t-cmd";
-        const ps = document.createElement("span");
-        ps.className = "t-ps";
-        ps.textContent = "❯";
-        div.appendChild(ps);
-        div.appendChild(document.createTextNode(text));
-        out.appendChild(div);
-        out.scrollTop = out.scrollHeight;
-    }
-
-    const BANNER =
-        " ██╗  ██╗██╗\n" +
-        " ██║ ██╔╝██║\n" +
-        " █████╔╝ ██║\n" +
-        " ██╔═██╗ ██║\n" +
-        " ██║  ██╗███████╗\n" +
-        " ╚═╝  ╚═╝╚══════╝";
-
-    function boot() {
-        print(BANNER, "t-banner");
-        print("portfolio-shell v1.0 — Kaiwen Li, Mathematics @ CMU", "t-acc");
-        print("type 'help' to see what this thing can do.", "t-dim");
-        print("");
-    }
-
-    function setTerm(open) {
-        term.classList.toggle("open", open);
-        if (open) {
-            if (!booted) { booted = true; boot(); }
-            setTimeout(() => input.focus(), 80);
-        } else {
-            input.blur();
-        }
-    }
-
-    launcher.addEventListener("click", () => setTerm(!term.classList.contains("open")));
-    term.querySelector(".term-close").addEventListener("click", () => setTerm(false));
-    addEventListener("keydown", (e) => {
-        if (e.key === "`" && document.activeElement !== input) {
-            e.preventDefault();
-            setTerm(!term.classList.contains("open"));
-        }
-        if (e.key === "Escape") {
-            if (term.classList.contains("open")) setTerm(false);
-            if (globe.on) globe.on = false;
-        }
-    });
-
-    // the hero "prompt line" (home page) opens the terminal
-    const heroPrompt = document.querySelector(".hero-prompt");
-    if (heroPrompt) heroPrompt.addEventListener("click", () => setTerm(true));
-
-    /* ----- math helpers ----- */
-    function isPrime(n) {
-        if (n < 2) return false;
-        if (n % 2 === 0) return n === 2;
-        if (n % 3 === 0) return n === 3;
-        for (let i = 5; i * i <= n; i += 6) {
-            if (n % i === 0 || n % (i + 2) === 0) return false;
-        }
-        return true;
-    }
-    function smallestFactor(n) {
-        if (n % 2 === 0) return 2;
-        if (n % 3 === 0) return 3;
-        for (let i = 5; i * i <= n; i += 6) {
-            if (n % i === 0) return i;
-            if (n % (i + 2) === 0) return i + 2;
-        }
-        return n;
-    }
-    function nextPrime(n) {
-        let m = n + 1;
-        while (!isPrime(m)) m++;
-        return m;
-    }
-
-    const PROOFS = [
-        ["√2 is irrational",
-            "Suppose √2 = p/q in lowest terms. Then p² = 2q², so p is even: p = 2k.\n" +
-            "Substituting, 4k² = 2q² ⟹ q² = 2k², so q is even too — contradicting\n" +
-            "lowest terms. Hence no such p/q exists.  ∎"],
-        ["There are infinitely many primes (Euclid)",
-            "Given any finite list p₁, …, pₙ, let N = p₁·p₂·…·pₙ + 1. Each pᵢ divides N − 1,\n" +
-            "so none divides N. Thus N has a prime factor not in the list.  ∎"],
-        ["Handshake lemma",
-            "Every edge contributes exactly 2 to the sum of all vertex degrees, so\n" +
-            "Σ deg(v) = 2|E| is even. Therefore the number of odd-degree vertices is even.  ∎"],
-        ["Two Pittsburghers have the same hair count",
-            "A human head has fewer than 1,000,000 hairs, and Pittsburgh has over 300,000\n" +
-            "people — but wait, that's not enough… add the students. With more people than\n" +
-            "possible hair counts, the pigeonhole principle finishes the job.  ∎"],
-        ["0.999… = 1",
-            "Let x = 0.999… . Then 10x = 9.999… = 9 + x, so 9x = 9, giving x = 1.  ∎"],
-    ];
-
-    const PAGES = {
-        home: "index.html", experience: "experience.html", education: "experience.html",
-        achievements: "honors.html", math: "honors.html", mathematics: "honors.html", honors: "honors.html",
-        interests: "interests.html", megagem: "megagem.html",
-        bingbeats: "bingbeats.html", beats: "bingbeats.html",
-        assets: "https://arcg.is/04Xv9r",
-    };
-
-    const COMMANDS = ["help", "whoami", "resume", "contact", "ls", "open", "prove",
-        "prime", "collatz", "fib", "life", "glider", "spin", "globe", "clear",
-        "history", "pwd", "date", "echo", "exit"];
-
-    function exec(raw) {
-        const line = raw.trim();
-        if (!line) return;
-        printCmd(line);
-        history.push(line);
-        histIdx = history.length;
-
-        const [cmd, ...args] = line.split(/\s+/);
-        const c = cmd.toLowerCase();
-
-        switch (c) {
-            case "help":
-                print("navigation", "t-acc");
-                print("  ls              list pages");
-                print("  open <page>     jump to a page (e.g. open megagem)");
-                print("profile", "t-acc");
-                print("  whoami          one-liner");
-                print("  resume          the full summary");
-                print("  contact         how to reach me");
-                print("mathematics", "t-acc");
-                print("  prove           a random pocket proof");
-                print("  prime <n>       primality + smallest factor + next prime");
-                print("  collatz <n>     hailstone trajectory of n");
-                print("  fib <n>         exact n-th Fibonacci number (BigInt)");
-                print("playground", "t-acc");
-                print("  life on|off|soup   control the Game of Life background");
-                print("  glider [n]      launch gliders into the grid");
-                print("  spin            overclock the 4D tesseract (home page)");
-                print("  globe           summon a rotating globe of points");
-                print("system", "t-acc");
-                print("  clear · history · pwd · date · echo · exit");
-                break;
-
-            case "whoami":
-                print("Kaiwen Li — Mathematics and Computer Science @ Carnegie Mellon, Class of 2029.");
-                print("USAMO qualifier · constructive-logic researcher · builder of games and apps.", "t-dim");
-                break;
-
-            case "resume":
-            case "cat":
-                print("KAIWEN LI — Mathematics and Computer Science, CMU '29", "t-acc");
-                print("  kl5@andrew.cmu.edu · 1-412-891-5688 · Pittsburgh, PA", "t-dim");
-                print("EDUCATION    CMU, B.S. Mathematics and Computer Science (exp. May 2029)");
-                print("             Dean's List ×2 · Lord Byng Secondary (96/100)");
-                print("RESEARCH     Constructive logic & theoretical CS — Prof. Richard Statman");
-                print("HONORS       USAMO Qualifier · 2× AMC 12 HRD (top 1%) · 3× AIME (12/15) · Euclid top 2.5%");
-                print("PROJECTS     Bing Beats · MegaGem Live · Asset Management Research");
-                print("EXPERIENCE   Quant Market Making (3rd/35+) · TA @ Kerrisdale · Snowboard Instructor (CASI)");
-                print("PROGRAMS     SUMaC (Stanford) · UBC Math Circle · NSLC Engineering");
-                break;
-
-            case "contact":
-                print("email   kl5@andrew.cmu.edu", "t-cy");
-                print("phone   1-412-891-5688");
-                print("where   Pittsburgh, PA");
-                break;
-
-            case "ls":
-                print("home/  experience/  achievements/  interests/", "t-cy");
-                print("bingbeats/  megagem/  assets/ (external)", "t-cy");
-                break;
-
-            case "open": {
-                const key = (args[0] || "").toLowerCase();
-                const dest = PAGES[key];
-                if (!dest) {
-                    print(`open: unknown page '${args[0] || ""}' — try 'ls'`, "t-err");
-                } else if (dest.startsWith("http")) {
-                    print(`opening ${key} ↗`, "t-dim");
-                    window.open(dest, "_blank");
-                } else {
-                    print(`navigating to ${key}…`, "t-dim");
-                    setTimeout(() => { location.href = dest; }, 350);
-                }
-                break;
+        // the cursor sows life as it travels
+        let seedX = -999, seedY = -999;
+        addEventListener("pointermove", (e) => {
+            if (Math.hypot(e.clientX - seedX, e.clientY - seedY) > CS) {
+                seedX = e.clientX;
+                seedY = e.clientY;
+                const col = Math.floor(e.clientX / CS) + M, row = Math.floor(e.clientY / CS) + M;
+                // the visitor's cells are orange, like the gliders their clicks launch
+                setCell(col, row, 1, 1);
+                setCell(col + ((Math.random() * 3) | 0) - 1, row + ((Math.random() * 3) | 0) - 1, 1, 1);
             }
+        }, { passive: true });
 
-            case "prove": {
-                const [title, body] = PROOFS[(Math.random() * PROOFS.length) | 0];
-                print("Theorem. " + title + ".", "t-acc");
-                print(body);
-                break;
-            }
-
-            case "prime": {
-                const n = Number(args[0]);
-                if (!Number.isInteger(n) || n < 0) { print("usage: prime <positive integer>", "t-err"); break; }
-                if (n > 1e12) { print("prime: capped at 10^12 (this shell runs on your battery)", "t-err"); break; }
-                if (n < 2) { print(`${n} is neither prime nor composite.`); break; }
-                if (isPrime(n)) {
-                    print(`${n} is prime.`, "t-cy");
-                } else {
-                    const f = smallestFactor(n);
-                    print(`${n} = ${f} × ${n / f}  (not prime)`);
-                }
-                print(`next prime: ${nextPrime(n)}`, "t-dim");
-                break;
-            }
-
-            case "collatz": {
-                const n = Number(args[0]);
-                if (!Number.isInteger(n) || n < 1) { print("usage: collatz <positive integer>", "t-err"); break; }
-                if (n > 1e9) { print("collatz: capped at 10^9", "t-err"); break; }
-                let x = n, steps = 0, peak = n;
-                const seq = [n];
-                while (x !== 1 && steps < 1000) {
-                    x = x % 2 === 0 ? x / 2 : 3 * x + 1;
-                    peak = Math.max(peak, x);
-                    steps++;
-                    if (seq.length < 30) seq.push(x);
-                }
-                const shown = seq.join(" → ") + (steps + 1 > seq.length ? " → …" : "");
-                print(shown);
-                print(`reached 1 in ${steps} steps · peak ${peak}`, "t-cy");
-                print("(no counterexample today either)", "t-dim");
-                break;
-            }
-
-            case "fib": {
-                const n = Number(args[0]);
-                if (!Number.isInteger(n) || n < 0) { print("usage: fib <n>", "t-err"); break; }
-                if (n > 1000) { print("fib: capped at n = 1000", "t-err"); break; }
-                let a = 0n, b = 1n;
-                for (let i = 0; i < n; i++) { const t = a + b; a = b; b = t; }
-                const s = a.toString();
-                print(`F(${n}) = ${s}`);
-                if (s.length > 20) print(`(${s.length} digits, computed exactly)`, "t-dim");
-                break;
-            }
-
-            case "life": {
-                const sub = (args[0] || "").toLowerCase();
-                if (sub === "off") { life.on = false; print("Game of Life paused. the grid rests.", "t-dim"); }
-                else if (sub === "on") { life.on = true; print("Game of Life resumed. B3/S23, as nature intended.", "t-cy"); }
-                else if (sub === "soup") { soup(0.12); print("primordial soup deployed. watch the background.", "t-cy"); }
-                else print("usage: life on | off | soup", "t-err");
-                break;
-            }
-
-            case "glider": {
-                const n = Math.max(1, Math.min(Number(args[0]) || 3, 25));
-                for (let i = 0; i < n; i++) {
-                    stampGlider(Math.random() * innerWidth, Math.random() * innerHeight);
-                }
-                print(`${n} glider${n > 1 ? "s" : ""} launched. they travel diagonally, forever.`, "t-cy");
-                break;
-            }
-
-            case "spin":
-                if (tctx) {
-                    spinBoost = 14;
-                    print("tesseract overclocked. rotating through 4 planes at once.", "t-cy");
-                } else {
-                    print("no tesseract on this page — it lives on the home page.", "t-dim");
-                }
-                break;
-
-            case "globe":
-            case "sphere":
-            case "earth": {
-                ensureGlobe();
-                const sub = (args[0] || "").toLowerCase();
-                if (sub === "off") {
-                    globe.on = false;
-                    print("globe dismissed.", "t-dim");
-                } else {
-                    globe.on = true;
-                    spinBoost = Math.max(spinBoost, 8);
-                    print("2,000 points on a sphere. move the cursor to spin and tilt it.", "t-cy");
-                    print("`globe off` or Esc to dismiss.", "t-dim");
-                }
-                break;
-            }
-
-            case "clear":
-                out.innerHTML = "";
-                break;
-
-            case "history":
-                history.forEach((h, i) => print(`  ${i + 1}  ${h}`, "t-dim"));
-                break;
-
-            case "pwd":
-                print("/home/kaiwen/portfolio");
-                break;
-
-            case "date":
-                print(new Date().toString());
-                break;
-
-            case "echo":
-                print(args.join(" "));
-                break;
-
-            case "sudo":
-                print("Permission denied: reported to the Dean of Discrete Mathematics.", "t-err");
-                break;
-
-            case "rm":
-                print("nice try.", "t-err");
-                break;
-
-            case "exit":
-                setTerm(false);
-                break;
-
-            default:
-                if (PAGES[c]) { exec("open " + c); return; }
-                print(`command not found: ${c} — try 'help'`, "t-err");
-        }
-        print("");
+        // clicks/taps launch gliders (except on interactive elements). `click`, not
+        // `pointerdown`: on touch screens pointerdown also starts every scroll swipe.
+        addEventListener("click", (e) => {
+            if (e.button > 0 || !(e.target instanceof Element)) return;
+            if (e.target.closest("a, button, input, textarea, select, label, .site-nav, .overlay-menu, .portrait-frame")) return;
+            stampGlider(e.clientX, e.clientY);
+        });
     }
 
-    input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-            exec(input.value);
-            input.value = "";
-        } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            if (histIdx > 0) { histIdx--; input.value = history[histIdx] || ""; }
-        } else if (e.key === "ArrowDown") {
-            e.preventDefault();
-            if (histIdx < history.length) { histIdx++; input.value = history[histIdx] || ""; }
-        } else if (e.key === "Tab") {
-            e.preventDefault();
-            const v = input.value;
-            if (v.toLowerCase().startsWith("open ")) {
-                const part = v.slice(5).toLowerCase();
-                const hit = Object.keys(PAGES).find((p) => p.startsWith(part));
-                if (hit) input.value = "open " + hit;
-            } else if (v) {
-                const hit = COMMANDS.find((cName) => cName.startsWith(v.toLowerCase()));
-                if (hit) input.value = hit;
-            }
-        }
-    });
+    const hint = document.querySelector(".hero-hint");
+    if (hint && coarsePointer) hint.textContent = "tap anywhere to launch a glider";
 
     /* ============================================================
        KONAMI CODE — ↑↑↓↓←→←→BA
        ============================================================ */
-    const KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown",
-        "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
-    let kIdx = 0;
+    // a rolling buffer of the last ten keys, so a stray extra key or Caps Lock can't break it
+    const KONAMI = ["arrowup", "arrowup", "arrowdown", "arrowdown",
+        "arrowleft", "arrowright", "arrowleft", "arrowright", "b", "a"].join(" ");
+    const keys = [];
     addEventListener("keydown", (e) => {
-        if (document.activeElement === input) return;
-        kIdx = e.key === KONAMI[kIdx] ? kIdx + 1 : (e.key === KONAMI[0] ? 1 : 0);
-        if (kIdx === KONAMI.length) {
-            kIdx = 0;
-            life.on = true;
-            for (let i = 0; i < 16; i++) {
-                stampGlider(Math.random() * innerWidth, Math.random() * innerHeight);
+        if (typeof e.key !== "string") return;
+        keys.push(e.key.toLowerCase());
+        if (keys.length > 10) keys.shift();
+        if (keys.join(" ") === KONAMI) {
+            keys.length = 0;
+            for (let i = 0; i < 6; i++) spawnShip(true);
+            for (let i = 0; i < 12; i++) {
+                stampGlider(Math.random() * life.w, Math.random() * life.h);
             }
-            soup(0.06);
-            spinBoost = 20;
-            toast("// achievement unlocked — the grid is alive");
+            toast("// achievement unlocked — the pond is alive");
         }
     });
 
     /* ============================================================
        HERO IDENTITY TYPEWRITER  (home page only — guards on element)
        Types + retypes short "I ___" lines about who Kaiwen is.
-       textContent only — never innerHTML (see terminal contract).
+       Uses textContent only, never innerHTML.
        ============================================================ */
     (function heroTypewriter() {
         const type = document.querySelector(".hl-type");
@@ -818,17 +454,27 @@
     /* ============================================================
        MAIN LOOP
        ============================================================ */
+    let lastMeasure = 0;
     function loop(ts) {
-        cur.nx += (cur.tx - cur.nx) * 0.06;
-        cur.ny += (cur.ty - cur.ny) * 0.06;
-
-        if (life.ctx && ts - life.lastTick > life.TICK) {
-            life.lastTick = ts;
-            if (life.on) lifeTick();
+        if (life.ctx && life.cells) {
+            if (ts - life.lastTick > TICK) {
+                life.lastTick = ts;
+                lifeTick();
+                updateStats();
+            }
+            // judge the population by what is on screen — oscillators parked in the
+            // hidden margin must not keep a small phone's pond empty
+            if (ts - life.lastSpawn > SPAWN_EVERY) {
+                life.lastSpawn = ts;
+                if (life.seen < Math.max(14, life.visCols * life.visRows * 0.022)) spawnShip(false);
+            }
+            if (ts - lastMeasure > 1000) {
+                lastMeasure = ts;
+                measureKeepouts();
+            }
+            strength = heroStrength();
+            lifeRender(ts);
         }
-        lifeRender();
-        drawTesseract();
-        if (globe.cv) drawGlobe();
         requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);

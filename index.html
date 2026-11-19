@@ -12,22 +12,16 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap"
         rel="stylesheet">
+    <script>try{if(localStorage.getItem("kl-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <!-- Ambient cursor-reactive background -->
-    <div class="ambient">
-        <div class="orb orb-violet"></div>
-        <div class="orb orb-cyan"></div>
-        <div class="orb orb-pink"></div>
-        <div class="orb orb-amber"></div>
-        <div class="grid-overlay"></div>
-        <div class="noise"></div>
-    </div>
+    <!-- Game of Life background (drawn by signature.js) -->
+    <div class="ambient" aria-hidden="true"></div>
 
     <header class="site-nav">
-        <a class="nav-logo" href="index.html">KL.</a>
+        <a class="nav-logo" href="index.html" aria-label="KL — Kaiwen Li, home">KL</a>
                 <nav class="nav-links">
             <a href="index.html" class="active">Home</a>
             <a href="experience.html">Experience</a>
@@ -35,7 +29,6 @@
             <a href="interests.html">Interests</a>
             <a href="bingbeats.html">Bing Beats</a>
             <a href="megagem.html">MegaGem</a>
-            <a href="https://arcg.is/04Xv9r" target="_blank" class="ext">Assets</a>
         </nav>
         <button class="menu-btn" aria-label="Open menu">
             <span class="bars"><span></span><span></span></span>
@@ -51,41 +44,37 @@
         <a href="interests.html"><span class="idx">04</span>Interests</a>
         <a href="bingbeats.html"><span class="idx">05</span>Bing Beats</a>
         <a href="megagem.html"><span class="idx">06</span>MegaGem Live</a>
-        <a href="https://arcg.is/04Xv9r" target="_blank"><span class="idx">07</span>Asset Management ↗</a>
     </div>
 
-    <!-- ============ HERO ============ -->
-    <section class="hero">
-        <div class="hero-watermark" aria-hidden="true">KAIWEN</div>
+    <!-- ============ HERO — the pond: four corners around live cells ============ -->
+    <section class="hero" aria-label="Introduction">
+        <p class="hero-epigraph" data-keepout>
+            simple rules, endless patterns —<br>
+            <span class="hero-hint">click anywhere to launch a glider</span>
+        </p>
 
-        <div class="hero-inner">
-            <button class="hero-prompt" type="button" aria-label="Open the terminal">
-                <span class="hp-caret">❯</span>
-                <span class="hp-path">kaiwen@portfolio</span>
-                <span class="hp-sep">·</span>
-                <span class="hp-hint">type <b>'help'</b></span>
-                <kbd class="hp-key">↵</kbd>
-            </button>
-
-            <h1 class="hero-signature">Kaiwen&nbsp;Li</h1>
-
-            <p class="hero-headline" aria-hidden="true">
-                <span class="hl-lead">I&nbsp;</span><span class="hl-type"></span><span class="hl-caret">▍</span>
+        <div class="hero-intro" data-keepout>
+            <p class="hero-headline">
+                <span class="sr-only">I prove theorems, research constructive logic, and build games and apps.</span>
+                <span aria-hidden="true"><span class="hl-lead">I&nbsp;</span><span class="hl-type"></span><span class="hl-caret">▍</span></span>
             </p>
-
-            <p class="hero-tag">
-                Mathematics and Computer Science at Carnegie Mellon University
+            <p class="hero-blurb">
+                <strong>Mathematics &amp; Computer Science</strong> at Carnegie&nbsp;Mellon, class of&nbsp;2029.
+                Researching <strong>constructive logic</strong> with Prof.&nbsp;Richard&nbsp;Statman, and building
+                things like <a href="bingbeats.html">Bing&nbsp;Beats</a> and <a href="megagem.html">MegaGem&nbsp;Live</a>.
             </p>
-
-            <p class="hero-contact">kl5@andrew.cmu.edu &nbsp;·&nbsp; 1-412-891-5688 &nbsp;·&nbsp; Pittsburgh, PA</p>
-
-            <div class="btn-row hero-cta" style="justify-content: center;">
-                <a class="btn btn-primary" href="#work">See my work <span class="arrow">→</span></a>
-                <a class="btn btn-ghost" href="mailto:kl5@andrew.cmu.edu">Get in touch</a>
-            </div>
+            <p class="hero-links">
+                <a href="mailto:kl5@andrew.cmu.edu">email</a><span aria-hidden="true">/</span><a href="https://www.linkedin.com/in/kaiwen-li-4a174b282/" target="_blank" rel="noopener">linkedin</a><span aria-hidden="true">/</span><a href="#work">work&nbsp;↓</a>
+            </p>
         </div>
 
-        <div class="scroll-cue">Scroll</div>
+        <p class="hero-stats" data-keepout aria-hidden="true">
+            <span>gen <b class="life-gen">0000</b></span>
+            <span>alive <b class="life-alive">000</b></span>
+            <span>rule <b>B3/S23</b></span>
+        </p>
+
+        <h1 class="hero-name" data-keepout>Kaiwen&nbsp;Li</h1>
     </section>
 
     <!-- ============ ABOUT ============ -->
@@ -95,7 +84,7 @@
 
             <div class="about-grid" style="margin-top: 2.2rem;">
                 <div class="portrait-frame" data-tilt data-reveal>
-                    <img src="381769150556_.pic.jpg" alt="Kaiwen Li">
+                    <img src="kaiwen-li.jpeg" alt="Kaiwen Li" width="768" height="1024">
                 </div>
 
                 <div class="about-bio" data-reveal style="--d: 0.1s;">
