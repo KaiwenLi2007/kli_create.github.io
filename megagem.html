@@ -3,284 +3,217 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>MegaGem Live | Kaiwen Li</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MegaGem Live — Kaiwen Li</title>
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f2f0ea'/%3E%3Ctext x='32' y='46' font-family='Georgia,serif' font-size='40' font-weight='bold' text-anchor='middle' fill='%230a0a0a'%3EK%3C/text%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap"
         rel="stylesheet">
-    <style>
-        :root {
-            --bg: #0d1117;
-            --card: #161b22;
-            --text: #c9d1d9;
-            --sub: #8b949e;
-            --border: #30363d;
-            --highlight: #f0f6fc;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', -apple-system, system-ui, sans-serif;
-            margin: 0;
-            display: flex;
-            min-height: 100vh;
-        }
-
-        nav {
-            border-right: 1px solid var(--border);
-            padding: 3rem 2rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            gap: 1.5rem;
-            background: var(--bg);
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            width: 220px;
-            min-width: 220px;
-            box-sizing: border-box;
-        }
-
-        .sidebar-logo {
-            width: 100%;
-            display: flex;
-            justify-content: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .sidebar-logo img {
-            max-width: 80px;
-            height: auto;
-            border-radius: 8px;
-        }
-
-        @media (max-width: 850px) {
-            .sidebar-logo {
-                width: auto;
-                margin-bottom: 0;
-                margin-right: 1rem;
-            }
-
-            .sidebar-logo img {
-                max-width: 40px;
-            }
-        }
-
-        .sidebar-footer {
-            margin-top: auto;
-            padding-top: 2rem;
-        }
-
-        .sidebar-footer p {
-            color: var(--sub);
-            font-size: 0.75rem;
-            margin: 4px 0;
-            font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
-            line-height: 1.4;
-        }
-
-        @media (max-width: 850px) {
-            .sidebar-footer {
-                display: none;
-            }
-        }
-
-        nav a {
-            font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
-            color: var(--sub);
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        nav a:hover,
-        .active {
-            color: var(--highlight);
-        }
-
-        .container {
-            flex-grow: 1;
-            max-width: 800px;
-            margin: 80px auto 40px auto;
-            padding: 0 40px;
-            font-size: 1.15rem;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: calc(100vh - 120px);
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            color: var(--highlight);
-            letter-spacing: -1px;
-            margin: 0 0 1rem 0;
-            font-weight: 800;
-        }
-
-        h2 {
-            font-size: 1.5rem;
-            color: var(--highlight);
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        h3 {
-            font-size: 1.2rem;
-            color: var(--highlight);
-            margin-top: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        p {
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-
-        a {
-            color: #58a6ff;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .code-block {
-            background: #010409;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            font-family: "JetBrains Mono", monospace;
-            font-size: 0.9rem;
-            overflow-x: auto;
-            margin-bottom: 1.5rem;
-        }
-
-        ul {
-            margin-bottom: 1rem;
-            padding-left: 1.5rem;
-        }
-
-        li {
-            margin-bottom: 0.5rem;
-        }
-
-        .btn-link {
-            display: inline-block;
-            color: var(--highlight);
-            text-decoration: none;
-            border: 1px solid var(--border);
-            padding: 0.75rem 1.25rem;
-            border-radius: 6px;
-            background: var(--card);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.95rem;
-            margin-right: 1rem;
-            margin-bottom: 1rem;
-            transition: all 0.2s;
-        }
-
-        .btn-link:hover {
-            border-color: #58a6ff;
-            background: #1f2a36;
-            text-decoration: none;
-        }
-
-        @media (max-width: 850px) {
-            body {
-                flex-direction: column;
-            }
-
-            nav {
-                width: 100%;
-                height: auto;
-                flex-direction: row;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-                position: relative;
-                padding: 1.5rem;
-                justify-content: center;
-                gap: 1.5rem;
-                flex-wrap: wrap;
-            }
-
-            .container {
-                margin: 40px auto;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <nav>
-        <div class="sidebar-logo">
-            <img src="Gemini_Generated_Image_7rpene7rpene7rpe (1).png" alt="Logo">
-        </div>
-        <a href="index.html">~/home</a>
-        <a href="education.html">~/education</a>
-        <a href="experience.html">~/experience</a>
-        <a href="honors.html">~/mathematical experience</a>
-        <a href="interests.html">~/interests</a>
-        <a href="https://arcg.is/04Xv9r" target="_blank">~/asset management project</a>
-        <a href="https://kaiwenli1000.wixsite.com/adopt-our-community" target="_blank">~/community project</a>
-        <a href="news.html">~/news intelligence engine</a>
-        <a href="todo.html">~/To-Do List Planner</a>
-        <a href="megagem.html" class="active">~/MegaGem Live</a>
-        <a href="habits.html">~/Habits (15113)</a>
-        <a href="bingbeats.html">~/Bing Beats</a>
-
-        <footer class="sidebar-footer">
-            <p>kl5@andrew.cmu.edu </p>
-            <p>1-412-891-5688</p>
-            <p>Assisted by Gemini</p>
-        </footer>
-    </nav>
-    <div class="container">
-        <h1>MegaGem Live</h1>
-
-        <p>An interactive auction strategy game (1 human vs 2 AI players). Read hidden gem signals, win key auctions,
-            and optimize final value. Built entirely from scratch using Python (Flask/Socket.IO) and Vanilla JavaScript.
-            It features real-time multiplayer bidding, automated AI opponents, and an integrated Gemini-powered AI Tutor
-            that offers in-game predictions and gameplay insights.</p>
-
-        <div style="margin-top: 1.5rem; margin-bottom: 2rem;">
-            <a href="https://kaiwenli2007.github.io/MegaGem_Live/" target="_blank" class="btn-link">~/Landing Page</a>
-            <a href="https://megagem-live.onrender.com" target="_blank" class="btn-link">~/Live Game</a>
-        </div>
-
-        <h2>Features</h2>
-        <ul>
-            <li><strong>Start Game</strong> — Full game with real-time bidding, reveals, and end-round scoring.</li>
-            <li><strong>Play with Tutor</strong> — Same game plus an in-game coach (Gemini) and a <strong>prediction
-                    chart</strong> of estimated gem values from public info (via QuickChart No-Code API).</li>
-            <li><strong>Learn How to Play</strong> — Step-by-step tutorial and Q&A with an AI tutor.</li>
-        </ul>
-
-        <h2>Tech Stack</h2>
-        <ul>
-            <li><strong>Backend:</strong> Python, Flask, Flask-SocketIO, eventlet</li>
-            <li><strong>AI:</strong> Google Gemini (tutor + in-game coach + AI bidders)</li>
-            <li><strong>Frontend:</strong> Vanilla JS, Socket.IO client</li>
-            <li><strong>Charts:</strong> QuickChart API</li>
-        </ul>
-
-        <h2>Game Rules (Short)</h2>
-        <ul>
-            <li>3 players (you + 2 AI). Everyone starts with <strong>35 coins</strong>.</li>
-            <li><strong>30 gems</strong> (5 types: Gold, Sapphire, Jade, Onyx, Opal), 6 of each. At round start
-                <strong>15 are removed</strong> and split as private info (5 per player).</li>
-            <li>Auctions use a deck of action cards (Win 1 Gem, Win 2 Gems, Invest, Loan, etc.). Highest bid wins and
-                pays; ties go to lower player ID.</li>
-            <li>When you win, you <strong>reveal one private removed gem</strong>; that info is public and affects
-                everyone’s estimates.</li>
-            <li><strong>Gem value</strong> at end of round = (total removed count for that type) × 4. Final score =
-                coins + investment + bonus − loans + gem worth.</li>
-        </ul>
+    <div class="ambient">
+        <div class="orb orb-violet"></div>
+        <div class="orb orb-cyan"></div>
+        <div class="orb orb-pink"></div>
+        <div class="orb orb-amber"></div>
+        <div class="grid-overlay"></div>
+        <div class="noise"></div>
     </div>
+
+    <header class="site-nav">
+        <a class="nav-logo" href="index.html">KL.</a>
+                <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="experience.html">Experience</a>
+            <a href="honors.html">Achievements</a>
+            <a href="interests.html">Interests</a>
+            <a href="bingbeats.html">Bing Beats</a>
+            <a href="megagem.html" class="active">MegaGem</a>
+            <a href="https://arcg.is/04Xv9r" target="_blank" class="ext">Assets</a>
+        </nav>
+        <button class="menu-btn" aria-label="Open menu">
+            <span class="bars"><span></span><span></span></span>
+            Menu
+        </button>
+    </header>
+
+        <div class="overlay-menu">
+        <button class="overlay-close">Close</button>
+        <a href="index.html"><span class="idx">01</span>Home</a>
+        <a href="experience.html"><span class="idx">02</span>Experience</a>
+        <a href="honors.html"><span class="idx">03</span>Achievements</a>
+        <a href="interests.html"><span class="idx">04</span>Interests</a>
+        <a href="bingbeats.html"><span class="idx">05</span>Bing Beats</a>
+        <a href="megagem.html"><span class="idx">06</span>MegaGem Live</a>
+        <a href="https://arcg.is/04Xv9r" target="_blank"><span class="idx">07</span>Asset Management ↗</a>
+    </div>
+
+    <main class="page article">
+        <span class="kicker" data-reveal>Project 02 — Game · AI · 3D · Feb 2026</span>
+        <h1 class="display" data-reveal style="--d: 0.05s;">MegaGem <em>Live.</em></h1>
+        <p class="lede" data-reveal style="--d: 0.1s;">
+            An interactive auction-strategy game — one human against two AI bidders — played from a
+            first-person seat inside a neon 3D auction room. Nobody holds full information: read the
+            hidden gem signals, win the auctions that matter, and outscore the AI before the round ends.
+        </p>
+
+        <div class="btn-row" data-reveal style="--d: 0.15s; margin-bottom: 2.4rem;">
+            <a class="btn btn-primary" href="https://megagem-live.onrender.com" target="_blank">Play the live game
+                <span class="arrow">→</span></a>
+            <a class="btn btn-ghost" href="https://kaiwenli2007.github.io/MegaGem_Live/" target="_blank">Landing
+                page</a>
+        </div>
+
+        <div class="stat-strip" data-reveal style="--d: 0.2s; margin-bottom: 1rem;">
+            <div class="stat"><div class="num">1 v 2</div><div class="lbl">Human vs AI bidders</div></div>
+            <div class="stat"><div class="num">30</div><div class="lbl">Gems · 5 types</div></div>
+            <div class="stat"><div class="num">15</div><div class="lbl">Hidden at round start</div></div>
+            <div class="stat"><div class="num">200+</div><div class="lbl">Simulated games verified</div></div>
+        </div>
+
+        <div data-reveal>
+            <p>
+                MegaGem Live began as a flat 2D auction dashboard — a port of Jane Street's board game
+                <strong>MegaGems</strong> — and grew into a real-time game with AI opponents, an AI coach, and a
+                full first-person 3D room, built from scratch with <strong>Python (Flask / Socket.IO)</strong> and
+                <strong>vanilla JavaScript</strong>.
+            </p>
+            <p>
+                The core tension is <strong>hidden information</strong>. At the start of a round, half the gems are
+                pulled from play and secretly split between the three players, so everyone holds a piece of the
+                answer. A gem type's final value depends on <em>how many</em> of that type were removed — and the only
+                way to learn more is to win auctions, which forces you to reveal one of your own secrets to the table.
+            </p>
+
+            <h2>How it plays</h2>
+            <ul>
+                <li><strong>3 players</strong> — you plus 2 AI bidders. Everyone starts with <strong>35 coins</strong>.</li>
+                <li><strong>30 gems</strong> across 5 types (Gold, Sapphire, Jade, Onyx, Opal), 6 of each. At round
+                    start <strong>15 are removed</strong> and dealt as private information — 5 per player.</li>
+                <li>A deck of <strong>action cards</strong> drives each auction — <em>Win 1 Gem</em>, <em>Win 2 Gems</em>,
+                    <em>Invest</em>, <em>Loan</em>. The highest bid wins and pays; ties break to the lower player ID.</li>
+                <li><strong>Winning costs information</strong> — you reveal one of your private removed gems to everyone,
+                    which shifts the whole table's estimate of what each type is ultimately worth.</li>
+            </ul>
+
+            <div class="code-block" data-reveal><span class="cm">// scored once, at end of round</span>
+gem value   = removed_count[type] &times; 4
+final score = coins + investments + bonuses &minus; loans + gem worth</div>
+
+            <p>
+                So the game is a constant balancing act: spend coins to win value and gather signals, but overpay
+                early — or leak the wrong secret at the wrong moment — and you hand the round to the AI.
+            </p>
+
+            <h2>Three ways in</h2>
+            <ul>
+                <li><strong>Start Game</strong> — the full real-time auction: live bidding, reveals, and end-round scoring.</li>
+                <li><strong>Play with Tutor</strong> — the same game with an AI coach on its own wall screen, offering
+                    tips and answering strategy questions mid-round.</li>
+                <li><strong>Learn How to Play</strong> — a step-by-step tutorial plus a Q&amp;A chat with an AI tutor.</li>
+            </ul>
+
+            <h2>Inside the 3D room</h2>
+            <p>
+                The 3D upgrade was deliberately <strong>decoupled</strong> from the game so the graphics could be bolted
+                on without touching a line of game logic. Four layers, each with one job — and because the backend
+                broadcasts the exact same events it did for the original 2D dashboard, the whole room is effectively a
+                presentation skin (a <em>Flat 2D mode</em> in settings switches it off entirely).
+            </p>
+
+            <div class="bento" style="margin: 1.4rem 0 0.5rem;">
+                <div class="glass-card span-3" data-tilt data-reveal>
+                    <span class="card-label">The Brain</span>
+                    <h3 class="card-title">Flask + Socket.IO</h3>
+                    <p class="card-desc">Runs all game logic, resolves bids, and broadcasts events. It has no idea the
+                        frontend is 3D.</p>
+                </div>
+                <div class="glass-card span-3" data-tilt data-reveal style="--d: 0.06s;">
+                    <span class="card-label">The Stage</span>
+                    <h3 class="card-title">Three.js · WebGL</h3>
+                    <p class="card-desc">Renders the physical room — desk, lighting, and the spinning gems that mirror
+                        the live gem queue.</p>
+                </div>
+                <div class="glass-card span-3" data-tilt data-reveal style="--d: 0.12s;">
+                    <span class="card-label">The Illusionist</span>
+                    <h3 class="card-title">CSS3DRenderer</h3>
+                    <p class="card-desc">Folds ordinary HTML — the bid form, leaderboard, and auction log — <em>inside</em>
+                        the 3D space as interactive panels, not flat textures.</p>
+                </div>
+                <div class="glass-card span-3" data-tilt data-reveal style="--d: 0.18s;">
+                    <span class="card-label">The Messenger</span>
+                    <h3 class="card-title">Socket.IO client</h3>
+                    <p class="card-desc">The connective tissue: it listens to the Brain, then tells the Stage to animate
+                        and the Illusionist to update.</p>
+                </div>
+            </div>
+
+            <h2>Tech stack</h2>
+            <ul>
+                <li><strong>Backend</strong> — Python, Flask, Flask-SocketIO, eventlet.</li>
+                <li><strong>Real-time</strong> — Socket.IO (WebSockets) for live bid / reveal / scoring events.</li>
+                <li><strong>AI</strong> — Google Gemini (<code>google-genai</code>) powers the AI bidders, the in-game
+                    coach, and the tutor, with a <strong>heuristic fallback</strong> when no API key is present.</li>
+                <li><strong>3D</strong> — Three.js (WebGL) for the room, plus CSS3DRenderer to fold real HTML panels
+                    into the scene.</li>
+                <li><strong>Frontend</strong> — vanilla JS, Socket.IO client, hand-built SVG gem art, and a custom
+                    canvas layer for sparkles, shockwaves, and confetti.</li>
+                <li><strong>Deploy</strong> — Docker and Render for the app; GitHub Pages for the static landing page.</li>
+            </ul>
+
+            <h2>Engineering challenges</h2>
+            <ul>
+                <li><strong>The human seat kept locking players out.</strong> It was tied to a socket connection, so a
+                    refresh spawned a new socket and the game rejected the returning player. Fixed by binding the seat
+                    to a persistent client ID in <code>localStorage</code> — it now survives refreshes and transfers to
+                    a new client if the owner has no live connection.</li>
+                <li><strong>The gem queue could show an impossible state.</strong> A refill bug briefly displayed 3 gems
+                    when it should never exceed 2. Fixed by refilling <strong>one gem at a time</strong>, and verified
+                    across <strong>200+ simulated games</strong>.</li>
+                <li><strong>Gemini availability is a moving target.</strong> Model IDs 404 by key, region, and API
+                    version, so the app defends with a <strong>fallback chain</strong> of model names and a heuristic
+                    bidder — the AI never hard-crashes the round.</li>
+                <li><strong>Folding real HTML into a 3D scene.</strong> Keeping CSS3DRenderer panels crisp, clickable,
+                    and correctly scaled meant auto-scaling every screen to the window while it stayed a live form
+                    element rather than a flat texture.</li>
+                <li><strong>Camera feel.</strong> View switches <strong>interpolate (lerp)</strong> between targets — the
+                    big screen, your tablet, the neutral room, the auction log — instead of snapping, simulating the
+                    motion of turning your head.</li>
+            </ul>
+
+            <h2>Reflection</h2>
+            <p>
+                The most valuable lesson wasn't any single technology — it was the payoff of <strong>clean separation
+                of concerns</strong>. Because the backend broadcasts game events without caring how they're displayed,
+                I could reimagine the frontend from flat HTML into a WebGL auction room without rewriting the game.
+                That Brain / Stage / Illusionist / Messenger split is the thing I'd carry into every future project.
+            </p>
+            <p>
+                The bugs taught the rest: in a real-time app, identity has to be <strong>durable</strong> and the source
+                of truth <strong>stable</strong> — tying a seat to a socket felt fine until the first refresh proved
+                otherwise. And integrating Gemini was a lesson in <strong>designing for failure</strong>: build the
+                fallback path first, so the game stays fun whether its opponents come from a language model or a simple
+                heuristic.
+            </p>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <span class="foot-name">Kaiwen Li</span>
+        <div class="foot-meta">
+            <a href="mailto:kl5@andrew.cmu.edu">kl5@andrew.cmu.edu</a>
+            <span>1-412-891-5688</span>
+            <span>Pittsburgh, PA</span>
+        </div>
+    </footer>
+
+    <script src="site.js"></script>
+    <script src="signature.js"></script>
 </body>
 
 </html>
